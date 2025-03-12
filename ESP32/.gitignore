@@ -1,0 +1,33 @@
+# Arduino IDE build folder
+/build/
+
+# Arduino IDE preferences file
+/preferences.txt
+
+# Arduino IDE configuration files
+*.prefs
+
+# ESP32 specific files
+*.bin
+*.elf
+*.map
+*.d
+*.a
+
+# Libraries
+/libraries/
+
+# Arduino IDE compiled sketches
+/*.ino.cpp
+/*.ino.h
+/*.ino.o
+/*.ino.d
+
+# Sketch export
+*.tar
+*.zip
+
+# Ignore any backup files created by IDEs
+*.swp
+*.bak
+*.tmp
