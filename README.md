@@ -5,6 +5,8 @@ camera control, image processing, and OTA firmware updates for connected devices
 users to manage devices, adjust camera settings, process images, and download results, all through
 an intuitive web interface.
 
+For more information, visit the project [website](https://neuraleye.thezion.one/).
+
 ## Developers
 
 The following developers contributed to this project:
