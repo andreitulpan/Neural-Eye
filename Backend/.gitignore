@@ -5,7 +5,7 @@
 *.msp
 
 # Windows Installer files (excluding the build directories)
-# .vs
+.vs
 .vs2019
 .vs2017
 .vs2015
@@ -48,3 +48,6 @@ node_modules/
 
 # NPM packages
 node_modules/
+
+# Migrations
+Migrations/
