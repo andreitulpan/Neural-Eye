@@ -17,7 +17,6 @@ var builder = WebApplication.CreateBuilder(args);
 // Register JwtSettings configuration
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 
-Console.WriteLine("PULA0");
 builder.Services.AddAuthentication(opt =>
 {
     opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -35,9 +34,9 @@ builder.Services.AddAuthentication(opt =>
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = jwtSettings.Issuer,
-        ValidAudience = jwtSettings.Audience,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey))
+        ValidIssuer = jwtSettings!.Issuer,
+        ValidAudience = jwtSettings!.Audience,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings!.SecretKey!))
     };
 
     o.Events = new JwtBearerEvents
