@@ -6,6 +6,7 @@ namespace NeuralEye.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(AuthenticationSchemes = "Bearer")]
     public class WeatherForecastController : ControllerBase
     {
         private static readonly string[] Summaries =
@@ -13,10 +14,11 @@ namespace NeuralEye.Controllers
             "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
         };
 
-        [Authorize]
+        
         [HttpGet("weatherforecast")]
         public IActionResult GetWeatherForecast()
         {
+            Console.WriteLine(HttpContext.User.Identity?.IsAuthenticated);
             var forecast = Enumerable.Range(1, 5).Select(index =>
                 new WeatherForecast
                 (
