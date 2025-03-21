@@ -1,27 +1,29 @@
-# Use official .NET runtime
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+# Use the official .NET SDK image to build the application
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+
+# Set the working directory in the container
 WORKDIR /app
-EXPOSE 80
-EXPOSE 443
 
-# Build stage
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-WORKDIR /src
+# Copy the entire project files into the container
+COPY . ./
 
-# Copy the csproj file and restore dependencies
-COPY ["NeuralEye.csproj", "."]
-RUN dotnet restore "NeuralEye.csproj"
+# Restore the dependencies
+RUN dotnet restore NeuralEye.csproj
 
-# Copy everything else and build the project
-COPY . .
-RUN dotnet build -c Release -o /app/build
+# Build and publish the application (without --no-restore)
+RUN dotnet publish NeuralEye.csproj -c Release -o /app/publish
 
-# Publish stage
-FROM build AS publish
-RUN dotnet publish -c Release -o /app/publish
+# Use a smaller runtime image for deployment
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
 
-# Final stage
-FROM base AS final
+# Set the working directory in the runtime image
 WORKDIR /app
-COPY --from=publish /app/publish .
+
+# Expose necessary ports
+EXPOSE 8080
+
+# Copy the published application from the build image
+COPY --from=build /app/publish .
+
+# Define the entry point for the container
 ENTRYPOINT ["dotnet", "NeuralEye.dll"]
