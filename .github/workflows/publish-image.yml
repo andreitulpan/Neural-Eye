@@ -3,33 +3,28 @@ name: Docker Image CI
 on:
   push:
 
-permissions:
-  contents: read
-  packages: write
-
 jobs:
   build_and_publish:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Log in to GHCR
+      - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: ${{ github.actor }}
+          username: andreit07
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Verify GHCR login
-        run: docker info | grep -i "username"
 
-      - name: Build and push backend
+      - name: Build and push backend image
         run: |
           docker build ./Backend --tag ghcr.io/andreit07/img_backend:latest
           docker push ghcr.io/andreit07/img_backend:latest
 
-      - name: Build and push frontend
+      - name: Build and push frontend image
         run: |
           docker build ./Frontend --tag ghcr.io/andreit07/img_frontend:latest
           docker push ghcr.io/andreit07/img_frontend:latest
