@@ -21,6 +21,9 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Verify GHCR login
+        run: docker info | grep -i "username"
+
       - name: Build and push backend
         run: |
           docker build ./Backend --tag ghcr.io/andreit07/img_backend:latest
