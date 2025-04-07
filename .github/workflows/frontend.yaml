@@ -25,5 +25,5 @@ jobs:
 
       - name: Build and push frontend image
         run: |
-          docker build ./Frontend --tag ghcr.io/${{ vars.USERNAME }}/img_frontend:latest
-          docker push ghcr.io/${{ vars.USERNAME }}/img_frontend:latest
+          docker build ./Frontend --tag ghcr.io/${{ vars.USERNAME }}/neuraleye_frontend:latest
+          docker push ghcr.io/${{ vars.USERNAME }}/neuraleye_frontend:latest
