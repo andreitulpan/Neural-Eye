@@ -1,0 +1,16 @@
+services:
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - WATCHTOWER_POLL_INTERVAL=60  # Check every 1 minutes
+      - WATCHTOWER_CLEANUP=true       # Remove old images
+      - WATCHTOWER_LABEL_ENABLE=true  # Only update labeled containers with "com.centurylinklabs.watchtower.enable=true"
+      - WATCHTOWER_LIFECYCLE_HOOKS=true  # Enable lifecycle notifications
+      - WATCHTOWER_NOTIFICATIONS=shoutrrr
+      - WATCHTOWER_NOTIFICATION_URL={HIDDEN}
+      - DOCKER_USERNAME={HIDDEN}
+      - DOCKER_PASSWORD={HIDDEN}
