@@ -27,3 +27,5 @@ COPY --from=build /app/publish .
 
 # Define the entry point for the container
 ENTRYPOINT ["dotnet", "NeuralEye.dll"]
+
+# Workflow test
