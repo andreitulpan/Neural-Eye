@@ -1,0 +1,30 @@
+services:
+  wireguard:
+    image: linuxserver/wireguard
+    container_name: wireguard
+    restart: always
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Bucharest
+      - SERVERURL=X.X.X.X
+      - SERVERPORT=51820
+      - PEERS=5
+      - PEERDNS=X.X.X.X
+      - INTERNAL_SUBNET=X.X.X.X
+    volumes:
+      - ./config:/config
+      - /lib/modules:/lib/modules
+    ports:
+      - "51820:51820/udp"
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
+    networks:
+      neuraleye_network:
+        ipv4_address: X.X.X.X
+networks:
+  neuraleye_network:
+    external: true
