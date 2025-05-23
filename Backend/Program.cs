@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.DataProtection;
 using NeuralEye.Data;
 using NeuralEye.Models;
 using System.Text;
@@ -101,6 +102,11 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
 //    // Default policy that requires authentication
 //    options.FallbackPolicy = options.DefaultPolicy;
 //});
+
+// Configure Data Protection to store keys in /root/.aspnet/DataProtection-Keys
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo("/root/.aspnet/DataProtection-Keys"))
+    .SetApplicationName("NeuralEye");
 
 // Add services to the container.
 builder.Services.AddControllers();
