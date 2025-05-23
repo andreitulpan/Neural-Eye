@@ -54,3 +54,4 @@ Migrations/
 
 # Certificates
 Certs/
+certificate.pfx
