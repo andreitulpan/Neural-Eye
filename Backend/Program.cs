@@ -135,7 +135,32 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+// Configure Kestrel to use HTTPS
+builder.WebHost.ConfigureKestrel(options =>
+{
+    var environment = builder.Environment;
+    var pfxPath = Path.Combine(environment.ContentRootPath, "certificate.pfx");
+    var pfxPassword = "";
+
+    if (File.Exists(pfxPath))
+    {
+        options.ListenAnyIP(8080); // HTTP
+        options.ListenAnyIP(4443, listenOptions => // HTTPS
+        {
+            listenOptions.UseHttps(pfxPath, pfxPassword);
+        });
+    }
+    else
+    {
+        Console.WriteLine("PFX file not found. HTTPS will not be configured.");
+        options.ListenAnyIP(8080); // Fallback to HTTP only
+    }
+});
+
 var app = builder.Build();
+
+// Use HTTPS redirection middleware
+app.UseHttpsRedirection();
 
 // Use Swagger middleware in development environment
 if (app.Environment.IsDevelopment())
@@ -150,6 +175,7 @@ app.UseCors(cors =>
     cors.AllowAnyHeader();
     cors.AllowAnyMethod();
 });
+
 
 app.UseAuthentication();
 app.UseAuthorization();
