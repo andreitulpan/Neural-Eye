@@ -1,30 +1,28 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using NeuralEye.Services;
 
 namespace NeuralEye.Controllers
 {
     [Route("[controller]")]
     [ApiController]
     [Authorize(AuthenticationSchemes = "Bearer")]
-    public class StreamsController : ControllerBase
+    public class StreamController : ControllerBase
     {
+        private readonly ILatestImageStore _imageStore;
+        public StreamController(ILatestImageStore imageStore)
+        {
+            _imageStore = imageStore;
+        }
+
         private static readonly Dictionary<int, StreamInfo> StreamStates = new();
 
-        [HttpGet("{deviceId}")]
+        [HttpGet("image/{deviceId}")]
         public IActionResult GetStream(int deviceId)
         {
-            if (!StreamStates.TryGetValue(deviceId, out var stream))
-            {
-                stream = new StreamInfo
-                {
-                    DeviceId = deviceId,
-                    Status = "Stopped",
-                    StreamUrl = "",
-                    Configuration = "Default config"
-                };
-            }
+            var image = _imageStore.LatestImage;
 
-            return Ok(stream);
+            return Ok("test");
         }
 
         [HttpPost("{deviceId}/start")]
