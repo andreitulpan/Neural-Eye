@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { SidebarProvider } from '@/components/layout/SidebarContext';
 import AppLayout from '@/components/layout/AppLayout';
+import { useWebSocketImageStream } from '@/hooks/useWebSocketImageStream';
 
 // Mock device data
 const mockDevices = [
@@ -55,6 +56,17 @@ const StreamView = () => {
   const [loading, setLoading] = useState(true);
   const [muted, setMuted] = useState(true);
   const [activeTab, setActiveTab] = useState('live');
+  
+  // WebSocket connection for Front Door Camera (id: '1')
+  const { 
+    isConnected: wsConnected, 
+    currentImage, 
+    connectionError 
+  } = useWebSocketImageStream({
+    url: 'wss://neuraleye.thezion.one/ws',
+    deviceId: id === '1' ? 'front-door-camera' : undefined,
+    autoConnect: id === '1' && activeTab === 'live'
+  });
   
   useEffect(() => {
     // Simulate API call to get device details
@@ -117,6 +129,83 @@ const StreamView = () => {
     navigate(`/devices/${id}/edit`);
   };
   
+  const getStreamContent = () => {
+    // For Front Door Camera (id: '1'), show WebSocket stream
+    if (id === '1') {
+      if (device.status !== 'online') {
+        return (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/70">
+            <p className="text-xl font-semibold text-white">
+              {device.status === 'offline' ? 'Camera Offline' : 'Camera in Maintenance Mode'}
+            </p>
+          </div>
+        );
+      }
+
+      if (connectionError) {
+        return (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/70">
+            <div className="text-center text-white">
+              <p className="text-xl font-semibold">Connection Error</p>
+              <p className="text-sm text-gray-300 mt-2">{connectionError}</p>
+            </div>
+          </div>
+        );
+      }
+
+      if (!wsConnected) {
+        return (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/70">
+            <div className="text-center text-white">
+              <p className="text-xl font-semibold">Connecting...</p>
+              <p className="text-sm text-gray-300 mt-2">Establishing WebSocket connection</p>
+            </div>
+          </div>
+        );
+      }
+
+      if (currentImage) {
+        return (
+          <img 
+            src={currentImage} 
+            alt="Live camera feed" 
+            className="w-full h-full object-cover"
+          />
+        );
+      }
+
+      return (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/70">
+          <div className="text-center text-white">
+            <p className="text-xl font-semibold">Waiting for Images</p>
+            <p className="text-sm text-gray-300 mt-2">Connected, waiting for camera data...</p>
+          </div>
+        </div>
+      );
+    }
+
+    // For other cameras, show placeholder
+    return (
+      <>
+        <div 
+          className="flex items-center justify-center h-full w-full text-white"
+          style={{ 
+            backgroundImage: 'url(https://placehold.co/1280x720/1e1e2e/e0e0e0?text=Live+Stream)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center'
+          }}
+        />
+        {device.status !== 'online' && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/70">
+            <p className="text-xl font-semibold text-white">
+              {device.status === 'offline' ? 'Camera Offline' : 'Camera in Maintenance Mode'}
+            </p>
+          </div>
+        )}
+      </>
+    );
+  };
+  
   return (
     <SidebarProvider>
       <AppLayout>
@@ -142,23 +231,8 @@ const StreamView = () => {
               <Card className="border-border bg-dashboard-card">
                 <CardContent className="p-0">
                   <div className="relative bg-black aspect-video w-full">
-                    {/* This would be a real video stream in production */}
-                    <div 
-                      id="streamVideo"
-                      className="flex items-center justify-center h-full w-full text-white"
-                      style={{ 
-                        backgroundImage: 'url(https://placehold.co/1280x720/1e1e2e/e0e0e0?text=Live+Stream)',
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center'
-                      }}
-                    >
-                      {device.status !== 'online' && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/70">
-                          <p className="text-xl font-semibold">
-                            {device.status === 'offline' ? 'Camera Offline' : 'Camera in Maintenance Mode'}
-                          </p>
-                        </div>
-                      )}
+                    <div id="streamVideo" className="relative h-full w-full">
+                      {getStreamContent()}
                     </div>
                     
                     <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
@@ -173,8 +247,17 @@ const StreamView = () => {
                             {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
                           </Button>
                           <div className="text-white text-sm">
-                            Live
-                            <span className="ml-2 px-1.5 py-0.5 bg-red-500/80 rounded-sm animate-pulse">●</span>
+                            {id === '1' && wsConnected ? (
+                              <>
+                                Live
+                                <span className="ml-2 px-1.5 py-0.5 bg-green-500/80 rounded-sm animate-pulse">●</span>
+                              </>
+                            ) : (
+                              <>
+                                Live
+                                <span className="ml-2 px-1.5 py-0.5 bg-red-500/80 rounded-sm">●</span>
+                              </>
+                            )}
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
@@ -224,6 +307,14 @@ const StreamView = () => {
                           {device.status === 'online' ? 'Online' : device.status === 'offline' ? 'Offline' : 'Maintenance'}
                         </span>
                       </div>
+                      {id === '1' && (
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">WebSocket:</span>
+                          <span className={wsConnected ? 'text-status-online' : 'text-status-error'}>
+                            {wsConnected ? 'Connected' : 'Disconnected'}
+                          </span>
+                        </div>
+                      )}
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Resolution:</span>
                         <span>1280x720</span>
