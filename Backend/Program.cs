@@ -141,26 +141,10 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-// Configure Kestrel to use HTTPS
+// Configure Kestrel to use HTTP on port 5001 only
 builder.WebHost.ConfigureKestrel(options =>
 {
-    var environment = builder.Environment;
-    var pfxPath = Path.Combine(environment.ContentRootPath, "certificate.pfx");
-    var pfxPassword = "";
-
-    if (File.Exists(pfxPath))
-    {
-        options.ListenAnyIP(8080); // HTTP
-        options.ListenAnyIP(4443, listenOptions => // HTTPS
-        {
-            listenOptions.UseHttps(pfxPath, pfxPassword);
-        });
-    }
-    else
-    {
-        Console.WriteLine("PFX file not found. HTTPS will not be configured.");
-        options.ListenAnyIP(8080); // Fallback to HTTP only
-    }
+    options.ListenAnyIP(5001);
 });
 
 var app = builder.Build();
@@ -187,6 +171,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-app.UseHttpsRedirection();
 
 app.Run();

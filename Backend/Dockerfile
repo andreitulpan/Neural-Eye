@@ -20,8 +20,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
 WORKDIR /app
 
 # Expose necessary ports
-EXPOSE 8080
-EXPOSE 4443
+EXPOSE 5001
 
 # Copy the published application from the build image
 COPY --from=build /app/publish .
