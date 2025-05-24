@@ -6,13 +6,16 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 
 const Register = () => {
-  const { toast } = useToast();
+  const { toast: uiToast } = useToast();
   const navigate = useNavigate();
+  const { register } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
-    name: '',
+    fullName: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -29,7 +32,7 @@ const Register = () => {
     e.preventDefault();
     
     if (formData.password !== formData.confirmPassword) {
-      toast({
+      uiToast({
         variant: "destructive",
         title: "Passwords do not match",
         description: "Please make sure your passwords match.",
@@ -40,25 +43,21 @@ const Register = () => {
     setIsLoading(true);
     
     try {
-      // This would be replaced with actual API call
-      console.log('Registration attempt with:', formData);
+      // Register using auth service
+      const { confirmPassword, ...registerData } = formData;
+      await register(registerData);
       
-      // Mock successful registration
-      setTimeout(() => {
-        toast({
-          title: "Registration successful",
-          description: "Your account has been created. Please sign in.",
-        });
-        // Use navigate instead of directly changing window.location
-        navigate('/login');
-      }, 1500);
+      toast.success("Registration successful", {
+        description: "Your account has been created!"
+      });
       
+      navigate('/dashboard');
     } catch (error) {
       console.error('Registration error:', error);
-      toast({
+      uiToast({
         variant: "destructive",
         title: "Registration failed",
-        description: "There was an error creating your account. Please try again.",
+        description: error.message || "There was an error creating your account. Please try again.",
       });
     } finally {
       setIsLoading(false);
@@ -72,20 +71,20 @@ const Register = () => {
           <CardHeader className="space-y-1 text-center">
             <CardTitle className="text-2xl font-bold">Create an account</CardTitle>
             <CardDescription>
-              Enter your information to create a LiveVue.io account
+              Enter your information to create a NeuralEye account
             </CardDescription>
           </CardHeader>
           <form onSubmit={handleSubmit}>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Full Name</Label>
+                <Label htmlFor="fullName">Full Name</Label>
                 <Input
-                  id="name"
-                  name="name"
+                  id="fullName"
+                  name="fullName"
                   type="text"
                   placeholder="John Doe"
                   required
-                  value={formData.name}
+                  value={formData.fullName}
                   onChange={handleChange}
                   className="bg-secondary"
                 />

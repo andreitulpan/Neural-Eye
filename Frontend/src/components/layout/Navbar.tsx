@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Bell, Menu, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -17,7 +18,7 @@ import {
 } from '@/components/ui/popover';
 import { useSidebar } from './SidebarContext';
 import { toast } from 'sonner';
-import { useAuth } from '@/App';
+import { useAuth } from '@/contexts/AuthContext';
 
 // Mock notifications
 const mockNotifications = [
@@ -47,7 +48,7 @@ const mockNotifications = [
 const Navbar = () => {
   const { setIsOpen } = useSidebar();
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
   const [notifications, setNotifications] = useState(mockNotifications);
 
   const unreadCount = notifications.filter(n => !n.read).length;
@@ -59,7 +60,7 @@ const Navbar = () => {
     navigate('/login');
   };
 
-  const markAsRead = (id) => {
+  const markAsRead = (id: number) => {
     setNotifications(prev => 
       prev.map(notification => 
         notification.id === id 
@@ -83,7 +84,7 @@ const Navbar = () => {
           <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setIsOpen(prev => !prev)}>
             <Menu className="h-5 w-5" />
           </Button>
-          <h1 className="text-xl font-semibold">LiveVue.io</h1>
+          <h1 className="text-xl font-semibold">NeuralEye</h1>
         </div>
 
         <div className="flex items-center gap-2">
@@ -134,7 +135,9 @@ const Navbar = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuLabel>
+                {user?.fullName || 'My Account'}
+              </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => navigate('/settings')}>Profile</DropdownMenuItem>
               <DropdownMenuItem onClick={() => navigate('/settings')}>Settings</DropdownMenuItem>
