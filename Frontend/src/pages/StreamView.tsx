@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Download, Maximize2, Settings, Volume2, VolumeX, Wifi, WifiOff } from 'lucide-react';
+import { ArrowLeft, Download, Maximize2, Settings, Volume2, VolumeX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { SidebarProvider } from '@/components/layout/SidebarContext';
 import AppLayout from '@/components/layout/AppLayout';
-import { useMqttClient } from '@/hooks/useMqttClient';
 
 // Mock device data
 const mockDevices = [
@@ -56,14 +55,6 @@ const StreamView = () => {
   const [muted, setMuted] = useState(true);
   const [activeTab, setActiveTab] = useState('live');
   
-  // MQTT configuration for Front Door Camera (id: '1')
-  const isFrontDoorCamera = id === '1';
-  const { isConnected: mqttConnected, lastMessage: mqttImage, error: mqttError } = useMqttClient({
-    brokerUrl: 'ws://localhost:9001', // WebSocket port for MQTT over WebSocket
-    topic: 'images/topic',
-    enabled: isFrontDoorCamera && device?.status === 'online'
-  });
-  
   useEffect(() => {
     // Simulate API call to get device details
     const foundDevice = mockDevices.find(d => d.id === id);
@@ -77,16 +68,6 @@ const StreamView = () => {
     
     setLoading(false);
   }, [id, navigate]);
-  
-  // Show MQTT connection status for Front Door Camera
-  useEffect(() => {
-    if (isFrontDoorCamera && mqttError) {
-      toast.error(`MQTT Error: ${mqttError}`);
-    }
-    if (isFrontDoorCamera && mqttConnected) {
-      toast.success('Connected to MQTT broker');
-    }
-  }, [isFrontDoorCamera, mqttError, mqttConnected]);
   
   if (loading) {
     return (
@@ -146,21 +127,6 @@ const StreamView = () => {
             <div>
               <h1 className="text-2xl font-bold">{device.name}</h1>
               <p className="text-muted-foreground">{device.location}</p>
-              {isFrontDoorCamera && (
-                <div className="flex items-center gap-2 mt-1">
-                  {mqttConnected ? (
-                    <div className="flex items-center gap-1 text-status-online text-sm">
-                      <Wifi className="h-3 w-3" />
-                      <span>MQTT Connected</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-1 text-status-error text-sm">
-                      <WifiOff className="h-3 w-3" />
-                      <span>MQTT Disconnected</span>
-                    </div>
-                  )}
-                </div>
-              )}
             </div>
           </div>
           
@@ -178,30 +144,17 @@ const StreamView = () => {
                     <div 
                       id="streamVideo"
                       className="flex items-center justify-center h-full w-full text-white"
-                      style={
-                        isFrontDoorCamera && mqttImage
-                          ? {
-                              backgroundImage: `url(${mqttImage})`,
-                              backgroundSize: 'cover',
-                              backgroundPosition: 'center'
-                            }
-                          : { 
-                              backgroundImage: 'url(https://placehold.co/1280x720/1e1e2e/e0e0e0?text=Live+Stream)',
-                              backgroundSize: 'cover',
-                              backgroundPosition: 'center'
-                            }
-                      }
+                      style={{ 
+                        backgroundImage: 'url(https://placehold.co/1280x720/1e1e2e/e0e0e0?text=Live+Stream)',
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center'
+                      }}
                     >
                       {device.status !== 'online' && (
                         <div className="absolute inset-0 flex items-center justify-center bg-black/70">
                           <p className="text-xl font-semibold">
                             {device.status === 'offline' ? 'Camera Offline' : 'Camera in Maintenance Mode'}
                           </p>
-                        </div>
-                      )}
-                      {isFrontDoorCamera && device.status === 'online' && !mqttConnected && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/70">
-                          <p className="text-xl font-semibold">Connecting to MQTT...</p>
                         </div>
                       )}
                     </div>
@@ -218,7 +171,7 @@ const StreamView = () => {
                             {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
                           </Button>
                           <div className="text-white text-sm">
-                            {isFrontDoorCamera ? 'MQTT Live' : 'Live'}
+                            Live
                             <span className="ml-2 px-1.5 py-0.5 bg-red-500/80 rounded-sm animate-pulse">●</span>
                           </div>
                         </div>
