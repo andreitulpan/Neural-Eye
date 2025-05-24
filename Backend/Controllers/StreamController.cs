@@ -4,7 +4,7 @@ using NeuralEye.Services;
 
 namespace NeuralEye.Controllers
 {
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     [ApiController]
     [Authorize(AuthenticationSchemes = "Bearer")]
     public class StreamController : ControllerBase
