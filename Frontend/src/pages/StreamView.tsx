@@ -63,7 +63,7 @@ const StreamView = () => {
     currentImage, 
     connectionError 
   } = useWebSocketImageStream({
-    url: 'wss://neuraleye.thezion.one:443/ws',
+    url: 'wss://neuraleye.thezion.one:443/api/ws',
     deviceId: id === '1' ? 'front-door-camera' : undefined,
     autoConnect: id === '1' && activeTab === 'live'
   });
