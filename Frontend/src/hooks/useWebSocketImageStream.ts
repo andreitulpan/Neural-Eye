@@ -40,13 +40,22 @@ export const useWebSocketImageStream = ({
       ws.onmessage = (event) => {
         try {
           if (event.data instanceof Blob) {
-            // Handle binary image data
+            // Handle binary image data (bytes)
             const reader = new FileReader();
             reader.onload = () => {
               const result = reader.result as string;
               setCurrentImage(result);
             };
             reader.readAsDataURL(event.data);
+          } else if (event.data instanceof ArrayBuffer) {
+            // Handle ArrayBuffer data
+            const blob = new Blob([event.data], { type: 'image/jpeg' });
+            const reader = new FileReader();
+            reader.onload = () => {
+              const result = reader.result as string;
+              setCurrentImage(result);
+            };
+            reader.readAsDataURL(blob);
           } else {
             // Handle text messages (potentially base64 encoded images)
             const data = JSON.parse(event.data);

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Download, Maximize2, Settings, Volume2, VolumeX } from 'lucide-react';
@@ -62,7 +63,7 @@ const StreamView = () => {
     currentImage, 
     connectionError 
   } = useWebSocketImageStream({
-    url: 'ws://localhost:8080/ws',
+    url: 'ws://192.168.100.30:5001/ws',
     deviceId: id === '1' ? 'front-door-camera' : undefined,
     autoConnect: id === '1' && activeTab === 'live'
   });
