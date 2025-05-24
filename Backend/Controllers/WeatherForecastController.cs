@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace NeuralEye.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     [Authorize(AuthenticationSchemes = "Bearer")]
     public class WeatherForecastController : ControllerBase

@@ -8,7 +8,7 @@ using System.Text;
 
 namespace NeuralEye.Controllers
 {
-    [Route("api/auth")]
+    [Route("auth")]
     [ApiController]
     public class AuthController : ControllerBase
     {
