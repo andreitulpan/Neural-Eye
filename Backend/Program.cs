@@ -170,7 +170,7 @@ app.MapGet("/", () => "Hello over HTTPS!");
 
 app.Map("/ws", async context =>
 {
-    var webSocketManager = context.RequestServices.GetRequiredService<WebSocketHandler>();
+    var webSocketManager = context.RequestServices.GetRequiredService<IWebSocketHandler>();
 
     if (!context.WebSockets.IsWebSocketRequest)
     {
