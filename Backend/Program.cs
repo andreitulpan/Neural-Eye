@@ -8,6 +8,10 @@ using Microsoft.AspNetCore.DataProtection;
 using NeuralEye.Data;
 using NeuralEye.Models;
 using System.Text;
+using NeuralEye.Services;
+using System.Collections.Concurrent;
+using System.Net.WebSockets;
+using Microsoft.AspNetCore.Http;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -141,6 +145,11 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+
+builder.Services.AddHostedService<MqttService>();
+builder.Services.AddSingleton<ILatestImageStore, LatestImageStore>();
+builder.Services.AddSingleton<IWebSocketHandler, WebSocketHandler>();
+
 // Configure Kestrel to use HTTP on port 5001 only
 builder.WebHost.ConfigureKestrel(options =>
 {
@@ -148,6 +157,43 @@ builder.WebHost.ConfigureKestrel(options =>
 });
 
 var app = builder.Build();
+
+var webSocketOptions = new WebSocketOptions
+{
+    KeepAliveInterval = TimeSpan.FromSeconds(120)
+};
+app.UseWebSockets(webSocketOptions);
+
+// HTTPS route
+app.MapGet("/", () => "Hello over HTTPS!");
+
+
+app.Map("/ws", async context =>
+{
+    var webSocketManager = context.RequestServices.GetRequiredService<WebSocketHandler>();
+
+    if (!context.WebSockets.IsWebSocketRequest)
+    {
+        context.Response.StatusCode = 400;
+        return;
+    }
+
+    var webSocket = await context.WebSockets.AcceptWebSocketAsync();
+    await webSocketManager.AddSocketAsync(webSocket);
+
+    var buffer = new byte[1024 * 4];
+    WebSocketReceiveResult result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+
+    while (!result.CloseStatus.HasValue)
+    {
+        result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+    }
+
+    await webSocket.CloseAsync(result.CloseStatus.Value, result.CloseStatusDescription, CancellationToken.None);
+    await webSocketManager.RemoveSocketAsync(webSocket);
+});
+
+
 
 // Use HTTPS redirection middleware
 app.UseHttpsRedirection();
