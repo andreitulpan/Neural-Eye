@@ -6,9 +6,11 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
+import { authService } from '@/services/authService';
+import { toast } from 'sonner';
 
 const ForgotPassword = () => {
-  const { toast } = useToast();
+  const { toast: uiToast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
@@ -18,24 +20,18 @@ const ForgotPassword = () => {
     setIsLoading(true);
     
     try {
-      // This would be replaced with actual API call
-      console.log('Password reset request for:', email);
+      await authService.forgotPassword({ email });
       
-      // Mock successful submission
-      setTimeout(() => {
-        setSubmitted(true);
-        toast({
-          title: "Reset link sent",
-          description: "If an account exists with that email, we've sent a password reset link.",
-        });
-      }, 1500);
-      
+      setSubmitted(true);
+      toast.success("Reset link sent", {
+        description: "If an account exists with that email, we've sent a password reset link."
+      });
     } catch (error) {
       console.error('Error sending reset link:', error);
-      toast({
+      uiToast({
         variant: "destructive",
         title: "Request failed",
-        description: "There was an error sending the reset link. Please try again.",
+        description: error.message || "There was an error sending the reset link. Please try again.",
       });
     } finally {
       setIsLoading(false);

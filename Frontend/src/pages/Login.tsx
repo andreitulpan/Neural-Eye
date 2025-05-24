@@ -6,10 +6,11 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
-import { useAuth } from '@/App';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 
 const Login = () => {
-  const { toast } = useToast();
+  const { toast: uiToast } = useToast();
   const navigate = useNavigate();
   const { login } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
@@ -30,29 +31,19 @@ const Login = () => {
     setIsLoading(true);
     
     try {
-      // This would be replaced with actual API call
-      console.log('Login attempt with:', formData);
+      await login(formData);
       
-      // Mock successful login
-      setTimeout(() => {
-        toast({
-          title: "Login successful",
-          description: "Welcome back to LiveVue.io!",
-        });
-        
-        // Use the login function from auth context
-        login();
-        
-        // Navigate to dashboard
-        navigate('/dashboard');
-      }, 1500);
+      toast.success("Login successful", {
+        description: "Welcome back to NeuralEye!"
+      });
       
+      navigate('/dashboard');
     } catch (error) {
       console.error('Login error:', error);
-      toast({
+      uiToast({
         variant: "destructive",
         title: "Login failed",
-        description: "Invalid email or password. Please try again.",
+        description: error.message || "Invalid email or password. Please try again.",
       });
     } finally {
       setIsLoading(false);
@@ -64,7 +55,7 @@ const Login = () => {
       <div className="w-full max-w-md">
         <Card className="border-border bg-dashboard-card">
           <CardHeader className="space-y-1 text-center">
-            <CardTitle className="text-2xl font-bold">LiveVue.io</CardTitle>
+            <CardTitle className="text-2xl font-bold">NeuralEye</CardTitle>
             <CardDescription>
               Enter your credentials to sign in to your account
             </CardDescription>

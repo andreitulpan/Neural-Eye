@@ -12,7 +12,7 @@ const About = () => {
       <AppLayout>
         <div className="space-y-6">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">About LiveVue.io</h1>
+            <h1 className="text-3xl font-bold tracking-tight">About NeuralEye</h1>
             <p className="text-muted-foreground mt-2">
               Advanced video monitoring and object detection platform for IoT devices.
             </p>
@@ -23,7 +23,7 @@ const About = () => {
               <CardHeader>
                 <CardTitle>Our Platform</CardTitle>
                 <CardDescription>
-                  LiveVue.io provides a seamless interface between ESP32-CAM devices and advanced video processing capabilities.
+                  NeuralEye provides a seamless interface between ESP32-CAM devices and advanced video processing capabilities.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -68,7 +68,7 @@ const About = () => {
               <CardHeader>
                 <CardTitle>Technical Information</CardTitle>
                 <CardDescription>
-                  Learn about the technologies powering the LiveVue.io platform.
+                  Learn about the technologies powering the NeuralEye platform.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -117,7 +117,7 @@ const About = () => {
             <CardHeader>
               <CardTitle>Our Team</CardTitle>
               <CardDescription>
-                Meet the people behind LiveVue.io
+                Meet the people behind NeuralEye
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -136,7 +136,7 @@ const About = () => {
           </Card>
           
           <div className="text-center text-sm text-muted-foreground pt-6 pb-10">
-            <p>© 2023 LiveVue.io. All rights reserved.</p>
+            <p>© 2025 NeuralEye Team. All rights reserved.</p>
             <p className="mt-1">Version 1.0.0</p>
           </div>
         </div>

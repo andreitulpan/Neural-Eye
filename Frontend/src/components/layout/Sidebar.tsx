@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { Home, Camera, Settings, Info, List, LogOut } from 'lucide-react';
@@ -5,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useSidebar } from './SidebarContext';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-import { useAuth } from '@/App';
+import { useAuth } from '@/contexts/AuthContext';
 
 const navItems = [
   { to: '/dashboard', icon: Home, label: 'Dashboard' },
@@ -51,7 +52,7 @@ const Sidebar = () => {
         )}
       >
         <div className="p-4 border-b border-border">
-          <h1 className="text-xl font-bold">LiveVue.io</h1>
+          <h1 className="text-xl font-bold">NeuralEye</h1>
           <p className="text-xs text-muted-foreground">IoT Video Monitoring</p>
         </div>
         
