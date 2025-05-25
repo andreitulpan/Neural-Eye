@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using NeuralEye.Data;
+using NeuralEye.Models;
 using NeuralEye.Services;
 
 namespace NeuralEye.Controllers
@@ -10,53 +12,34 @@ namespace NeuralEye.Controllers
     public class StreamController : ControllerBase
     {
         private readonly ILatestImageStore _imageStore;
-        public StreamController(ILatestImageStore imageStore)
+        private readonly ITextExtractionService _textExtractionService;
+        private readonly IRepository<Image> _imagesRepository;
+
+        public StreamController(ILatestImageStore imageStore, ITextExtractionService textExtractionService, IRepository<Image> imagesRepository)
         {
             _imageStore = imageStore;
+            _textExtractionService = textExtractionService;
+            _imagesRepository = imagesRepository;
         }
 
-        private static readonly Dictionary<int, StreamInfo> StreamStates = new();
 
-        [HttpGet("image/{deviceId}")]
-        public IActionResult GetStream(int deviceId)
+        [HttpPost("saveimage")]
+        public async Task<IActionResult> SaveImageAndExtractText([FromBody] ImageOCR imageOCR)
         {
-            var image = _imageStore.LatestImage;
+            var extractedText = _textExtractionService.ExtractText(imageOCR.Image);
 
-            return Ok("test");
-        }
-
-        [HttpPost("{deviceId}/start")]
-        public IActionResult StartStream(int deviceId)
-        {
-            var stream = new StreamInfo
+            var image = new Image
             {
-                DeviceId = deviceId,
-                Status = "Running",
-                StreamUrl = $"https://streams.example.com/device/{deviceId}",
-                Configuration = "1080p, 30fps"
+                UserId = imageOCR.UserId,
+                ImageData = _textExtractionService.ConvertHexStringToByteArray(imageOCR.Image),
+                ExtractedText = extractedText
             };
 
-            StreamStates[deviceId] = stream;
-            return Ok(stream);
+            await _imagesRepository.AddAsync(image);
+
+            return Ok(extractedText);
         }
 
-        [HttpPost("{deviceId}/stop")]
-        public IActionResult StopStream(int deviceId)
-        {
-            if (StreamStates.ContainsKey(deviceId))
-            {
-                StreamStates[deviceId].Status = "Stopped";
-                StreamStates[deviceId].StreamUrl = "";
-            }
-            return Ok(new { DeviceId = deviceId, Status = "Stopped" });
-        }
     }
 
-    public class StreamInfo
-    {
-        public int DeviceId { get; set; }
-        public string Status { get; set; } = string.Empty;
-        public string StreamUrl { get; set; } = string.Empty;
-        public string Configuration { get; set; } = string.Empty;
-    }
 }

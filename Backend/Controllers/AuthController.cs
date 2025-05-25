@@ -28,7 +28,7 @@ namespace NeuralEye.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Register([FromBody] RegisterModel model)
         {
-            var user = new ApplicationUser { UserName = model.Email, Email = model.Email, FullName = model.FullName };
+            var user = new ApplicationUser { UserName = model.FullName, Email = model.Email, FullName = model.FullName };
             var result = await _userManager.CreateAsync(user, model.Password);
 
             if (!result.Succeeded)
@@ -69,7 +69,13 @@ namespace NeuralEye.Controllers
             var token = tokenHandler.CreateToken(tokenDescriptor);
             var tokenString = tokenHandler.WriteToken(token);
 
-            return Ok(new { token = tokenString });
+            return Ok(new 
+            {
+                token = tokenString,
+                id = user.Id,
+                email = user.Email,
+                name = user.FullName
+            });
         }
     }
 }

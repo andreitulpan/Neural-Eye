@@ -149,6 +149,8 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddHostedService<MqttService>();
 builder.Services.AddSingleton<ILatestImageStore, LatestImageStore>();
 builder.Services.AddSingleton<IWebSocketHandler, WebSocketHandler>();
+builder.Services.AddSingleton<ITextExtractionService, TextExtractionService>();
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
 // Configure Kestrel to use HTTP on port 5001 only
 builder.WebHost.ConfigureKestrel(options =>
