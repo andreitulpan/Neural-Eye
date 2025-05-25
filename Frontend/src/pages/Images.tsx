@@ -20,6 +20,7 @@ const Images = () => {
     queryKey: ['userImages', user?.id],
     queryFn: () => {
       console.log('Query function called, making API request for user ID:', user!.id);
+      console.log (imageService.getUserImages(user!.id));
       return imageService.getUserImages(user!.id);
     },
     enabled: !!user?.id,
