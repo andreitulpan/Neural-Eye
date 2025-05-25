@@ -38,32 +38,51 @@ export const useWebSocketImageStream = ({
       };
 
       ws.onmessage = (event) => {
+        console.log('Received WebSocket message, type:', typeof event.data, 'data:', event.data);
+        
         try {
           if (event.data instanceof Blob) {
-            // Handle binary image data (bytes)
+            // Handle binary image data (Blob)
+            console.log('Processing Blob data, size:', event.data.size);
             const reader = new FileReader();
             reader.onload = () => {
               const result = reader.result as string;
+              console.log('Blob converted to data URL, length:', result.length);
               setCurrentImage(result);
             };
             reader.readAsDataURL(event.data);
           } else if (event.data instanceof ArrayBuffer) {
             // Handle ArrayBuffer data
+            console.log('Processing ArrayBuffer data, byteLength:', event.data.byteLength);
             const blob = new Blob([event.data], { type: 'image/jpeg' });
             const reader = new FileReader();
             reader.onload = () => {
               const result = reader.result as string;
+              console.log('ArrayBuffer converted to data URL, length:', result.length);
               setCurrentImage(result);
             };
             reader.readAsDataURL(blob);
-          } else {
-            // Handle text messages (potentially base64 encoded images)
-            const data = JSON.parse(event.data);
-            if (data.type === 'image' && data.data) {
-              // Assume base64 encoded image
-              const imageUrl = `data:image/jpeg;base64,${data.data}`;
+          } else if (typeof event.data === 'string') {
+            // Handle string data (could be JSON or base64)
+            console.log('Processing string data, length:', event.data.length);
+            
+            // Try to parse as JSON first
+            try {
+              const data = JSON.parse(event.data);
+              if (data.type === 'image' && data.data) {
+                // Assume base64 encoded image
+                const imageUrl = `data:image/jpeg;base64,${data.data}`;
+                console.log('JSON image data processed');
+                setCurrentImage(imageUrl);
+              }
+            } catch (jsonError) {
+              // If not JSON, treat as raw base64 data
+              console.log('Treating string as raw base64 data');
+              const imageUrl = `data:image/jpeg;base64,${event.data}`;
               setCurrentImage(imageUrl);
             }
+          } else {
+            console.warn('Unknown message format:', typeof event.data, event.data);
           }
         } catch (error) {
           console.error('Error processing WebSocket message:', error);
