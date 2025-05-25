@@ -18,24 +18,34 @@ export const useWebSocketImageStream = ({
   const [connectionError, setConnectionError] = useState<string | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const lastImageRef = useRef<string | null>(null);
 
   const updateImage = useCallback((imageUrl: string) => {
+    console.log('Updating image with new data, length:', imageUrl.length);
     setCurrentImage(imageUrl);
     setLastImage(imageUrl);
+    lastImageRef.current = imageUrl;
   }, []);
 
   const connect = useCallback(() => {
+    // Don't create a new connection if one already exists and is connecting/open
+    if (wsRef.current && (wsRef.current.readyState === WebSocket.CONNECTING || wsRef.current.readyState === WebSocket.OPEN)) {
+      console.log('WebSocket already connecting or connected, skipping');
+      return;
+    }
+
     try {
       console.log('Connecting to WebSocket:', url);
       const ws = new WebSocket(url);
       
       ws.onopen = () => {
-        console.log('WebSocket connected');
+        console.log('WebSocket connected successfully');
         setIsConnected(true);
         setConnectionError(null);
         
         // Send device identification if provided
         if (deviceId) {
+          console.log('Sending device subscription:', deviceId);
           ws.send(JSON.stringify({ 
             type: 'subscribe', 
             deviceId: deviceId 
@@ -44,7 +54,7 @@ export const useWebSocketImageStream = ({
       };
 
       ws.onmessage = (event) => {
-        console.log('Received WebSocket message, type:', typeof event.data, 'data:', event.data);
+        console.log('Received WebSocket message, type:', typeof event.data);
         
         try {
           if (event.data instanceof Blob) {
@@ -80,6 +90,8 @@ export const useWebSocketImageStream = ({
                 const imageUrl = `data:image/jpeg;base64,${data.data}`;
                 console.log('JSON image data processed');
                 updateImage(imageUrl);
+              } else {
+                console.log('Received non-image JSON message:', data);
               }
             } catch (jsonError) {
               // If not JSON, treat as raw base64 data
@@ -103,12 +115,17 @@ export const useWebSocketImageStream = ({
       ws.onclose = (event) => {
         console.log('WebSocket closed:', event.code, event.reason);
         setIsConnected(false);
-        setCurrentImage(lastImage); // Restore last image when connection closes
+        // Restore last image when connection closes
+        if (lastImageRef.current) {
+          setCurrentImage(lastImageRef.current);
+        }
         wsRef.current = null;
         
         // Attempt to reconnect after 3 seconds if not manually closed
         if (event.code !== 1000 && autoConnect) {
+          console.log('Scheduling reconnection in 3 seconds...');
           reconnectTimeoutRef.current = setTimeout(() => {
+            console.log('Attempting to reconnect...');
             connect();
           }, 3000);
         }
@@ -119,9 +136,10 @@ export const useWebSocketImageStream = ({
       console.error('Failed to create WebSocket connection:', error);
       setConnectionError('Failed to connect to WebSocket');
     }
-  }, [url, deviceId, autoConnect, updateImage, lastImage]);
+  }, [url, deviceId, autoConnect, updateImage]);
 
   const disconnect = useCallback(() => {
+    console.log('Disconnecting WebSocket...');
     if (reconnectTimeoutRef.current) {
       clearTimeout(reconnectTimeoutRef.current);
       reconnectTimeoutRef.current = null;
@@ -135,6 +153,7 @@ export const useWebSocketImageStream = ({
     setIsConnected(false);
     setCurrentImage(null);
     setLastImage(null);
+    lastImageRef.current = null;
   }, []);
 
   useEffect(() => {
