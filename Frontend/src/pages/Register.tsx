@@ -15,7 +15,7 @@ const Register = () => {
   const { register } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
-    fullName: '',
+    name: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -77,14 +77,14 @@ const Register = () => {
           <form onSubmit={handleSubmit}>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="fullName">Full Name</Label>
+                <Label htmlFor="name">Full Name</Label>
                 <Input
-                  id="fullName"
-                  name="fullName"
+                  id="name"
+                  name="name"
                   type="text"
                   placeholder="John Doe"
                   required
-                  value={formData.fullName}
+                  value={formData.name}
                   onChange={handleChange}
                   className="bg-secondary"
                 />

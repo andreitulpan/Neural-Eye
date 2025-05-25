@@ -1,3 +1,4 @@
+
 import { api } from "./api";
 
 export interface LoginRequest {
@@ -9,6 +10,10 @@ export interface RegisterRequest {
   name: string;
   email: string;
   password: string;
+}
+
+export interface ForgotPasswordRequest {
+  email: string;
 }
 
 export interface LoginResponse {
@@ -35,6 +40,10 @@ export const authService = {
 
   async register(data: RegisterRequest): Promise<RegisterResponse> {
     return api.post<RegisterResponse>("/api/auth/register", data);
+  },
+
+  async forgotPassword(data: ForgotPasswordRequest): Promise<{ success: boolean }> {
+    return api.post<{ success: boolean }>("/api/auth/forgot-password", data);
   },
 
   async saveImage(imageData: string, userId: string): Promise<SaveImageResponse> {
