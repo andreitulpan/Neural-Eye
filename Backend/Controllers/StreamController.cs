@@ -40,6 +40,13 @@ namespace NeuralEye.Controllers
             return Ok(extractedText);
         }
 
+        [HttpGet("getimages/{userId}")]
+        public async Task<IActionResult> GetImages(int userId)
+        {
+            var imagesForUser = await _imagesRepository.GetWhereAsync(x => x.UserId == userId);
+
+            return Ok(imagesForUser);
+        }
     }
 
 }

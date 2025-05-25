@@ -1,13 +1,14 @@
 ﻿using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace NeuralEye.Models
 {
     public class ImageOCR
     {
-        [JsonProperty("image")]
+        [JsonPropertyName("image")]
         public string Image { get; set; } = string.Empty;
 
-        [JsonProperty("user_id")]
+        [JsonPropertyName("user_id")]
         public int UserId { get; set; }
     }
 }
