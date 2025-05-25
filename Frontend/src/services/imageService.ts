@@ -12,7 +12,7 @@ export const imageService = {
   /**
    * Get all images and extracted text for a specific user
    */
-  async getUserImages(userId: string): Promise<ImageRecord[]> {
+  async getUserImages(userId: number): Promise<ImageRecord[]> {
     return api.get<ImageRecord[]>(`/api/stream/getimages/${userId}`);
   }
 };
