@@ -146,7 +146,7 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 
-builder.Services.AddHostedService<MqttService>();
+//builder.Services.AddHostedService<MqttService>();
 builder.Services.AddSingleton<ILatestImageStore, LatestImageStore>();
 builder.Services.AddSingleton<IWebSocketHandler, WebSocketHandler>();
 builder.Services.AddSingleton<ITextExtractionService, TextExtractionService>();
@@ -207,7 +207,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseRouting();
 
 app.UseCors(cors =>
 {
@@ -218,6 +217,20 @@ app.UseCors(cors =>
 
 
 app.UseAuthentication();
+
+app.Use(async (context, next) =>
+{
+    if (context.Request.Method == HttpMethods.Options)
+    {
+        context.Response.StatusCode = StatusCodes.Status204NoContent;
+        await context.Response.CompleteAsync();
+    }
+    else
+    {
+        await next();
+    }
+});
+
 app.UseAuthorization();
 
 app.MapControllers();
