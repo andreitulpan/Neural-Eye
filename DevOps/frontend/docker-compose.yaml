@@ -1,0 +1,9 @@
+services:
+  frontend:
+    container_name: frontend
+    image: ghcr.io/andreit07/neuraleye_frontend:latest
+    ports:
+      - "80:80"
+    restart: unless-stopped
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"

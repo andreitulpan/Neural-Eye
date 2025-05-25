@@ -1,0 +1,18 @@
+services:
+  sqlserver:
+    image: "mcr.microsoft.com/mssql/server:2022-latest"
+    container_name: "msc-sql-server"
+    restart: unless-stopped
+    ports:
+      - "1433:1433"
+    environment:
+      SA_PASSWORD: {HIDDEN}
+      ACCEPT_EULA: "Y"
+    volumes:
+      - ./sqlserver_data:/var/opt/mssql
+    networks:
+      neuraleye_network:
+        ipv4_address: X.X.X.X
+networks:
+  neuraleye_network:
+    external: true

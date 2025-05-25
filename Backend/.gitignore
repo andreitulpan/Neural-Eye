@@ -1,0 +1,57 @@
+# Windows Installer files
+*.cab
+*.msi
+*.msm
+*.msp
+
+# Windows Installer files (excluding the build directories)
+.vs
+.vs2019
+.vs2017
+.vs2015
+
+# ASP.NET Core files
+/bin/
+/obj/
+
+# User-specific files
+.idea/
+.vscode/
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+
+# ASP.NET temporary files
+*.db
+appsettings.json
+appsettings.Development.json
+
+# Azure Web Apps settings
+.vscode/launch.json
+.vscode/tasks.json
+
+# Node.js dependencies (if using Node.js with ASP.NET)
+node_modules/
+
+# Windows Installer files
+*.cab
+*.msi
+*.msm
+*.msp
+
+# JetBrains Rider
+.idea/
+
+# Rider IDE
+.idea/
+
+# NPM packages
+node_modules/
+
+# Migrations
+Migrations/
+
+# Certificates
+Certs/
+certificate.pfx
