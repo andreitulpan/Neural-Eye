@@ -160,14 +160,23 @@ const StreamView = () => {
       
       const response = await authService.saveImage(base64Data, user.id);
       
-      toast.success("Image saved and text extracted!", {
-        description: response.text ? `Extracted: ${response.text.substring(0, 100)}...` : "No text found in image"
-      });
+      // Check if text extraction was successful
+      if (response.text && response.text.trim() !== '') {
+        toast.success("Image saved and text extracted!", {
+          description: `Extracted: ${response.text.substring(0, 100)}...`
+        });
+      } else {
+        // Image was saved but no text was found
+        toast.success("Image saved successfully!");
+        toast.error("Failed to extract text from image", {
+          description: "No readable text was found in the image"
+        });
+      }
       
       console.log('Extracted text:', response.text);
     } catch (error) {
       console.error('Error saving image and extracting text:', error);
-      toast.error("Failed to save image and extract text");
+      toast.error("Failed to extract text from image");
     } finally {
       setIsExtracting(false);
     }
