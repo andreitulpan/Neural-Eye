@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using NeuralEye.Models;
 
 namespace NeuralEye.Data;
 
-public partial class ApplicationDbContext : DbContext
+public partial class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 {
     public ApplicationDbContext()
     {
@@ -26,6 +27,8 @@ public partial class ApplicationDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
+
         modelBuilder.Entity<Image>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__images__3214EC078861E7CB");
