@@ -11,5 +11,5 @@ public partial class Image
 
     public string? ExtractedText { get; set; }
 
-    public int? UserId { get; set; }
+    public string? UserId { get; set; }
 }

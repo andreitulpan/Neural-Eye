@@ -31,11 +31,12 @@ public partial class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
         modelBuilder.Entity<Image>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__images__3214EC078861E7CB");
+            entity.HasKey(e => e.Id).HasName("PK__images__3214EC070B3BD669");
 
             entity.ToTable("images");
 
             entity.Property(e => e.ExtractedText).IsUnicode(false);
+            entity.Property(e => e.UserId).HasMaxLength(450);
         });
 
         OnModelCreatingPartial(modelBuilder);

@@ -41,7 +41,7 @@ namespace NeuralEye.Controllers
         }
 
         [HttpGet("getimages/{userId}")]
-        public async Task<IActionResult> GetImages(int userId)
+        public async Task<IActionResult> GetImages(string userId)
         {
             var imagesForUser = await _imagesRepository.GetWhereAsync(x => x.UserId == userId);
 

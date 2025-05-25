@@ -9,6 +9,6 @@ namespace NeuralEye.Models
         public string Image { get; set; } = string.Empty;
 
         [JsonPropertyName("user_id")]
-        public int UserId { get; set; }
+        public string UserId { get; set; } = string.Empty;
     }
 }
