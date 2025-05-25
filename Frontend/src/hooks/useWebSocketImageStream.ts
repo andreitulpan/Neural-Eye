@@ -14,9 +14,15 @@ export const useWebSocketImageStream = ({
 }: UseWebSocketImageStreamOptions) => {
   const [isConnected, setIsConnected] = useState(false);
   const [currentImage, setCurrentImage] = useState<string | null>(null);
+  const [lastImage, setLastImage] = useState<string | null>(null);
   const [connectionError, setConnectionError] = useState<string | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const updateImage = useCallback((imageUrl: string) => {
+    setCurrentImage(imageUrl);
+    setLastImage(imageUrl);
+  }, []);
 
   const connect = useCallback(() => {
     try {
@@ -48,7 +54,7 @@ export const useWebSocketImageStream = ({
             reader.onload = () => {
               const result = reader.result as string;
               console.log('Blob converted to data URL, length:', result.length);
-              setCurrentImage(result);
+              updateImage(result);
             };
             reader.readAsDataURL(event.data);
           } else if (event.data instanceof ArrayBuffer) {
@@ -59,7 +65,7 @@ export const useWebSocketImageStream = ({
             reader.onload = () => {
               const result = reader.result as string;
               console.log('ArrayBuffer converted to data URL, length:', result.length);
-              setCurrentImage(result);
+              updateImage(result);
             };
             reader.readAsDataURL(blob);
           } else if (typeof event.data === 'string') {
@@ -73,13 +79,13 @@ export const useWebSocketImageStream = ({
                 // Assume base64 encoded image
                 const imageUrl = `data:image/jpeg;base64,${data.data}`;
                 console.log('JSON image data processed');
-                setCurrentImage(imageUrl);
+                updateImage(imageUrl);
               }
             } catch (jsonError) {
               // If not JSON, treat as raw base64 data
               console.log('Treating string as raw base64 data');
               const imageUrl = `data:image/jpeg;base64,${event.data}`;
-              setCurrentImage(imageUrl);
+              updateImage(imageUrl);
             }
           } else {
             console.warn('Unknown message format:', typeof event.data, event.data);
@@ -97,6 +103,7 @@ export const useWebSocketImageStream = ({
       ws.onclose = (event) => {
         console.log('WebSocket closed:', event.code, event.reason);
         setIsConnected(false);
+        setCurrentImage(lastImage); // Restore last image when connection closes
         wsRef.current = null;
         
         // Attempt to reconnect after 3 seconds if not manually closed
@@ -112,7 +119,7 @@ export const useWebSocketImageStream = ({
       console.error('Failed to create WebSocket connection:', error);
       setConnectionError('Failed to connect to WebSocket');
     }
-  }, [url, deviceId, autoConnect]);
+  }, [url, deviceId, autoConnect, updateImage, lastImage]);
 
   const disconnect = useCallback(() => {
     if (reconnectTimeoutRef.current) {
@@ -127,6 +134,7 @@ export const useWebSocketImageStream = ({
     
     setIsConnected(false);
     setCurrentImage(null);
+    setLastImage(null);
   }, []);
 
   useEffect(() => {
@@ -141,7 +149,7 @@ export const useWebSocketImageStream = ({
 
   return {
     isConnected,
-    currentImage,
+    currentImage: currentImage || lastImage, // Return last image if current is null
     connectionError,
     connect,
     disconnect
