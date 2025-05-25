@@ -64,7 +64,8 @@ const StreamView = () => {
   const { 
     isConnected: wsConnected, 
     currentImage, 
-    connectionError 
+    connectionError,
+    imageKey // Get the key for forcing re-renders
   } = useWebSocketImageStream({
     url: 'wss://neuraleye.thezion.one/ws',
     deviceId: id === '1' ? 'front-door-camera' : undefined,
@@ -214,12 +215,18 @@ const StreamView = () => {
       if (currentImage) {
         return (
           <img 
-            key={currentImage} // Force re-render when image changes
+            key={`stream-image-${imageKey}`} // Use imageKey to force re-renders
             src={currentImage} 
             alt="Live camera feed" 
             className="w-full h-full object-cover"
-            onLoad={() => console.log('Image loaded successfully')}
-            onError={(e) => console.error('Image failed to load:', e)}
+            style={{ imageRendering: 'auto' }} // Ensure proper image rendering
+            onLoad={(e) => {
+              console.log('Image loaded successfully, dimensions:', e.currentTarget.naturalWidth, 'x', e.currentTarget.naturalHeight);
+            }}
+            onError={(e) => {
+              console.error('Image failed to load:', e);
+              console.error('Image src:', currentImage.substring(0, 100));
+            }}
           />
         );
       }
