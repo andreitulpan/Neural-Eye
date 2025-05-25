@@ -18,6 +18,9 @@ export interface ForgotPasswordRequest {
 
 export interface LoginResponse {
   token: string;
+  id: number;
+  email: string;
+  name: string;
 }
 
 export interface RegisterResponse {
@@ -44,6 +47,16 @@ export const authService = {
    */
   async forgotPassword(data: ForgotPasswordRequest): Promise<{ success: boolean }> {
     return api.post<{ success: boolean }>("/api/auth/forgot-password", data, { isPublic: true });
+  },
+
+  /**
+   * Save image and extract OCR text
+   */
+  async saveImage(imageData: string, userId: number): Promise<{ text: string }> {
+    return api.post<{ text: string }>("/stream/saveimage", {
+      image: imageData,
+      user_id: userId
+    });
   },
 
   /**

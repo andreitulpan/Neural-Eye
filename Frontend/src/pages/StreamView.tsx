@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Download, Maximize2, Settings, Volume2, VolumeX } from 'lucide-react';
+import { ArrowLeft, FileText, Maximize2, Settings, Volume2, VolumeX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -9,6 +8,8 @@ import { toast } from 'sonner';
 import { SidebarProvider } from '@/components/layout/SidebarContext';
 import AppLayout from '@/components/layout/AppLayout';
 import { useWebSocketImageStream } from '@/hooks/useWebSocketImageStream';
+import { useAuth } from '@/contexts/AuthContext';
+import { authService } from '@/services/authService';
 
 // Mock device data
 const mockDevices = [
@@ -52,10 +53,12 @@ const mockDevices = [
 const StreamView = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [device, setDevice] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [muted, setMuted] = useState(true);
   const [activeTab, setActiveTab] = useState('live');
+  const [isExtracting, setIsExtracting] = useState(false);
   
   // WebSocket connection for Front Door Camera (id: '1')
   const { 
@@ -120,9 +123,30 @@ const StreamView = () => {
     }
   };
   
-  const handleSnapshot = () => {
-    // In a real app, this would take a snapshot of the current frame
-    toast.success("Snapshot taken");
+  const handleSaveAndExtract = async () => {
+    if (!currentImage || !user) {
+      toast.error("No image available or user not authenticated");
+      return;
+    }
+
+    setIsExtracting(true);
+    try {
+      // Extract base64 data from data URL
+      const base64Data = currentImage.split(',')[1] || currentImage;
+      
+      const response = await authService.saveImage(base64Data, user.id);
+      
+      toast.success("Image saved and text extracted!", {
+        description: response.text ? `Extracted: ${response.text.substring(0, 100)}...` : "No text found in image"
+      });
+      
+      console.log('Extracted text:', response.text);
+    } catch (error) {
+      console.error('Error saving image and extracting text:', error);
+      toast.error("Failed to save image and extract text");
+    } finally {
+      setIsExtracting(false);
+    }
   };
   
   const handleEdit = () => {
@@ -265,9 +289,11 @@ const StreamView = () => {
                             variant="ghost" 
                             size="icon" 
                             className="rounded-full bg-white/10 hover:bg-white/20 text-white"
-                            onClick={handleSnapshot}
+                            onClick={handleSaveAndExtract}
+                            disabled={isExtracting || !currentImage}
+                            title="Save image and extract text"
                           >
-                            <Download className="h-4 w-4" />
+                            <FileText className="h-4 w-4" />
                           </Button>
                           <Button 
                             variant="ghost" 

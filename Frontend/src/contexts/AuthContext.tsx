@@ -3,8 +3,9 @@ import { createContext, useContext, useState, useEffect, ReactNode } from "react
 import { authService, LoginResponse, RegisterResponse, LoginRequest, RegisterRequest } from "../services/authService";
 
 interface User {
+  id: number;
   email: string;
-  fullName: string;
+  name: string;
 }
 
 interface AuthContextType {
@@ -65,10 +66,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       localStorage.setItem("authToken", response.token);
       localStorage.setItem("isAuthenticated", "true");
       
-      // Create user object from the credentials (since backend only returns token)
+      // Create user object from the new response structure
       const userData: User = {
-        email: credentials.email,
-        fullName: credentials.email.split('@')[0] // Fallback since we don't have fullName from login
+        id: response.id,
+        email: response.email,
+        name: response.name
       };
       
       localStorage.setItem("user", JSON.stringify(userData));
