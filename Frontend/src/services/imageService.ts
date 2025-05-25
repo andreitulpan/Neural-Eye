@@ -13,6 +13,7 @@ export const imageService = {
    * Get all images and extracted text for a specific user
    */
   async getUserImages(userId: string): Promise<ImageRecord[]> {
+    console.log('PULAAAAAAAAAAAAAAAAAAAAAAA');
     return api.get<ImageRecord[]>(`/api/stream/getimages/${userId}`);
   }
 };
