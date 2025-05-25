@@ -17,6 +17,24 @@ The following developers contributed to this project:
 - **Robert Pancu**
 - **Andrei Ion Toader**
 
+## User Manual
+1. **Logging in**
+ 
+  - Open the web application.
+  - Enter your username and password on the login screen.
+  - If you don’t have an account, use the Sign Up option.
+
+2. **Dashboard**
+- Click on the Devices tab in the left-hand menu to access and manage your connected camera devices.
+- You can also access the camera directly from the Device Status tab.
+ 
+3. **Devices**
+- Select the "View Stream" option under the Front Door Camera.
+- View the live image stream transmitted from the ESP32-CAM device in real time.
+- Click the button at the bottom-right corner to process the image and download it to your device.
+
+
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
