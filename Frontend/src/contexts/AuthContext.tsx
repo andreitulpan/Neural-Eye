@@ -3,7 +3,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from "react
 import { authService, LoginResponse, RegisterResponse, LoginRequest, RegisterRequest } from "../services/authService";
 
 interface User {
-  id: number;
+  id: string;
   email: string;
   name: string;
 }
@@ -68,7 +68,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       
       // Create user object from the new response structure
       const userData: User = {
-        id: response.id,
+        id: response.id.toString(), // Convert to string to match actual data
         email: response.email,
         name: response.name
       };
