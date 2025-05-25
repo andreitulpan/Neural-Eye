@@ -27,6 +27,24 @@ export interface RegisterResponse {
   message: string;
 }
 
+// Helper function to convert base64 to hex
+function base64ToHex(base64: string): string {
+  // Remove data URL prefix if present
+  const cleanBase64 = base64.replace(/^data:image\/[a-z]+;base64,/, '');
+  
+  // Convert base64 to binary string
+  const binaryString = atob(cleanBase64);
+  
+  // Convert binary string to hex
+  let hex = '';
+  for (let i = 0; i < binaryString.length; i++) {
+    const hexByte = binaryString.charCodeAt(i).toString(16).padStart(2, '0');
+    hex += hexByte;
+  }
+  
+  return hex;
+}
+
 export const authService = {
   /**
    * Log in a user
@@ -53,9 +71,12 @@ export const authService = {
    * Save image and extract OCR text
    */
   async saveImage(imageData: string, userId: number): Promise<{ text: string }> {
+    // Convert base64 to hex string
+    const hexData = base64ToHex(imageData);
+    
     return api.post<{ text: string }>("/stream/saveimage", {
-      image: imageData,
-      user_id: userId
+      image: hexData,
+      id: userId
     });
   },
 
