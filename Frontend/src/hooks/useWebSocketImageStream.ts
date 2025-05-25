@@ -14,17 +14,22 @@ export const useWebSocketImageStream = ({
 }: UseWebSocketImageStreamOptions) => {
   const [isConnected, setIsConnected] = useState(false);
   const [currentImage, setCurrentImage] = useState<string | null>(null);
-  const [lastImage, setLastImage] = useState<string | null>(null);
   const [connectionError, setConnectionError] = useState<string | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const lastImageRef = useRef<string | null>(null);
+  const imageUrlRef = useRef<string | null>(null);
 
   const updateImage = useCallback((imageUrl: string) => {
     console.log('Updating image with new data, length:', imageUrl.length);
+    
+    // Clean up previous object URL if it exists
+    if (imageUrlRef.current && imageUrlRef.current.startsWith('blob:')) {
+      URL.revokeObjectURL(imageUrlRef.current);
+    }
+    
+    // Store the new image URL
+    imageUrlRef.current = imageUrl;
     setCurrentImage(imageUrl);
-    setLastImage(imageUrl);
-    lastImageRef.current = imageUrl;
   }, []);
 
   const connect = useCallback(() => {
@@ -58,26 +63,16 @@ export const useWebSocketImageStream = ({
         
         try {
           if (event.data instanceof Blob) {
-            // Handle binary image data (Blob)
+            // Handle binary image data (Blob) - create object URL for better performance
             console.log('Processing Blob data, size:', event.data.size);
-            const reader = new FileReader();
-            reader.onload = () => {
-              const result = reader.result as string;
-              console.log('Blob converted to data URL, length:', result.length);
-              updateImage(result);
-            };
-            reader.readAsDataURL(event.data);
+            const imageUrl = URL.createObjectURL(event.data);
+            updateImage(imageUrl);
           } else if (event.data instanceof ArrayBuffer) {
             // Handle ArrayBuffer data
             console.log('Processing ArrayBuffer data, byteLength:', event.data.byteLength);
             const blob = new Blob([event.data], { type: 'image/jpeg' });
-            const reader = new FileReader();
-            reader.onload = () => {
-              const result = reader.result as string;
-              console.log('ArrayBuffer converted to data URL, length:', result.length);
-              updateImage(result);
-            };
-            reader.readAsDataURL(blob);
+            const imageUrl = URL.createObjectURL(blob);
+            updateImage(imageUrl);
           } else if (typeof event.data === 'string') {
             // Handle string data (could be JSON or base64)
             console.log('Processing string data, length:', event.data.length);
@@ -115,10 +110,6 @@ export const useWebSocketImageStream = ({
       ws.onclose = (event) => {
         console.log('WebSocket closed:', event.code, event.reason);
         setIsConnected(false);
-        // Restore last image when connection closes
-        if (lastImageRef.current) {
-          setCurrentImage(lastImageRef.current);
-        }
         wsRef.current = null;
         
         // Attempt to reconnect after 3 seconds if not manually closed
@@ -150,10 +141,14 @@ export const useWebSocketImageStream = ({
       wsRef.current = null;
     }
     
+    // Clean up object URL
+    if (imageUrlRef.current && imageUrlRef.current.startsWith('blob:')) {
+      URL.revokeObjectURL(imageUrlRef.current);
+    }
+    
     setIsConnected(false);
     setCurrentImage(null);
-    setLastImage(null);
-    lastImageRef.current = null;
+    imageUrlRef.current = null;
   }, []);
 
   useEffect(() => {
@@ -166,9 +161,18 @@ export const useWebSocketImageStream = ({
     };
   }, [connect, disconnect, autoConnect]);
 
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (imageUrlRef.current && imageUrlRef.current.startsWith('blob:')) {
+        URL.revokeObjectURL(imageUrlRef.current);
+      }
+    };
+  }, []);
+
   return {
     isConnected,
-    currentImage: currentImage || lastImage, // Return last image if current is null
+    currentImage,
     connectionError,
     connect,
     disconnect

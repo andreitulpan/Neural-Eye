@@ -131,8 +131,31 @@ const StreamView = () => {
 
     setIsExtracting(true);
     try {
-      // Extract base64 data from data URL
-      const base64Data = currentImage.split(',')[1] || currentImage;
+      // Extract base64 data from data URL or use object URL
+      let base64Data: string;
+      
+      if (currentImage.startsWith('data:')) {
+        // Data URL format
+        base64Data = currentImage.split(',')[1] || currentImage;
+      } else if (currentImage.startsWith('blob:')) {
+        // Object URL format - convert to base64
+        const response = await fetch(currentImage);
+        const blob = await response.blob();
+        const reader = new FileReader();
+        
+        base64Data = await new Promise((resolve, reject) => {
+          reader.onload = () => {
+            const result = reader.result as string;
+            const base64 = result.split(',')[1] || result;
+            resolve(base64);
+          };
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+      } else {
+        // Assume it's already base64
+        base64Data = currentImage;
+      }
       
       const response = await authService.saveImage(base64Data, user.id);
       
@@ -191,9 +214,12 @@ const StreamView = () => {
       if (currentImage) {
         return (
           <img 
+            key={currentImage} // Force re-render when image changes
             src={currentImage} 
             alt="Live camera feed" 
             className="w-full h-full object-cover"
+            onLoad={() => console.log('Image loaded successfully')}
+            onError={(e) => console.error('Image failed to load:', e)}
           />
         );
       }
