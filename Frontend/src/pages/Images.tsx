@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
@@ -20,7 +21,7 @@ const Images = () => {
     queryKey: ['userImages', user?.id],
     queryFn: () => {
       console.log('Query function called, making API request for user ID:', user!.id);
-      return imageService.getUserImages(user!.id.toString());
+      return imageService.getUserImages(user!.id);
     },
     enabled: !!user?.id,
   });
