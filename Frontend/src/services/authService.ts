@@ -76,7 +76,7 @@ export const authService = {
     
     return api.post<{ text: string }>("/stream/saveimage", {
       image: hexData,
-      id: userId
+      user_id: userId
     });
   },
 
