@@ -74,7 +74,7 @@ export const authService = {
     // Convert base64 to hex string
     const hexData = base64ToHex(imageData);
     
-    return api.post<{ text: string }>("/stream/saveimage", {
+    return api.post<{ text: string }>("api/stream/saveimage", {
       image: hexData,
       user_id: userId
     });
