@@ -14,7 +14,7 @@ const Images = () => {
 
   const { data: images, isLoading, error } = useQuery({
     queryKey: ['userImages', user?.id],
-    queryFn: () => imageService.getUserImages(user!.id),
+    queryFn: () => imageService.getUserImages(user!.id.toString()),
     enabled: !!user?.id,
   });
 
