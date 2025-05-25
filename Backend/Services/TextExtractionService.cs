@@ -1,5 +1,4 @@
 ﻿using IronOcr;
-using Microsoft.AspNetCore.Hosting.Server;
 
 namespace NeuralEye.Services
 {
@@ -25,7 +24,6 @@ namespace NeuralEye.Services
             input.LoadImage(imageBytes);
 
             var result = Ocr.Read(input);
-            Console.WriteLine(result.Text);
 
             return result.Text;
         }
