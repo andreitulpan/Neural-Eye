@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
@@ -12,11 +11,21 @@ import { Skeleton } from '@/components/ui/skeleton';
 const Images = () => {
   const { user } = useAuth();
 
+  console.log('Images component rendered');
+  console.log('Current user:', user);
+  console.log('User ID:', user?.id);
+  console.log('Query enabled condition (!!user?.id):', !!user?.id);
+
   const { data: images, isLoading, error } = useQuery({
     queryKey: ['userImages', user?.id],
-    queryFn: () => imageService.getUserImages(user!.id.toString()),
+    queryFn: () => {
+      console.log('Query function called, making API request for user ID:', user!.id);
+      return imageService.getUserImages(user!.id.toString());
+    },
     enabled: !!user?.id,
   });
+
+  console.log('Query state:', { images, isLoading, error });
 
   const renderImageContent = (image: ImageRecord) => {
     // Convert hex string back to base64 for display
