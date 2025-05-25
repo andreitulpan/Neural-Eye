@@ -39,7 +39,11 @@ namespace NeuralEye.Services
                     return;
                 }
 
-                if (totalChunks - 1 == chunkId)
+                if (chunkId == 0)
+                {
+                    _imageStore.LatestImage = bytes;
+                } 
+                else if (totalChunks - 1 == chunkId)
                 {
                     Console.WriteLine("Broadcasting complete image to WebSocket clients");
                     await _webSocketHandler.BroadcastAsync(_imageStore.LatestImage!);
@@ -54,9 +58,11 @@ namespace NeuralEye.Services
 
             var user = _configuration["MQTT:User"];
             var password = _configuration["MQTT:Password"];
+            var server = _configuration["MQTT:Server"];
+            var port = Int32.Parse(_configuration["MQTT:Port"]!);
 
             var options = new MqttClientOptionsBuilder()
-                .WithTcpServer("192.168.100.30", 1883)
+                .WithTcpServer(server, port)
                 .WithCredentials(user, password)
                 .Build();
 
