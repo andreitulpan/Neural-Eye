@@ -17,7 +17,7 @@ The following developers contributed to this project:
 - **Robert Pancu**
 - **Andrei Ion Toader**
 
-## User Manual:
+## User Manual
 1. **Logging in**
  
   - Open the web application.
