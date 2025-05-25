@@ -16,6 +16,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import About from "./pages/About";
 import StreamView from "./pages/StreamView";
 import DeviceForm from "./pages/DeviceForm";
+import Images from "./pages/Images";
 
 const queryClient = new QueryClient();
 
@@ -78,6 +79,7 @@ const AppRoutes = () => {
           <Route path="/devices/add" element={<ProtectedRoute><DeviceForm /></ProtectedRoute>} />
           <Route path="/devices/:id/edit" element={<ProtectedRoute><DeviceForm /></ProtectedRoute>} />
           <Route path="/stream-view/:id" element={<ProtectedRoute><StreamView /></ProtectedRoute>} />
+          <Route path="/images" element={<ProtectedRoute><Images /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
           <Route path="/about" element={<ProtectedRoute><About /></ProtectedRoute>} />
           

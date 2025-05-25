@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Home, Camera, Settings, Info, List, LogOut } from 'lucide-react';
+import { Home, Camera, Settings, Info, List, LogOut, Images } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useSidebar } from './SidebarContext';
 import { cn } from '@/lib/utils';
@@ -11,6 +11,7 @@ import { useAuth } from '@/contexts/AuthContext';
 const navItems = [
   { to: '/dashboard', icon: Home, label: 'Dashboard' },
   { to: '/devices', icon: Camera, label: 'Devices' },
+  { to: '/images', icon: Images, label: 'Images' },
   { to: '/logs', icon: List, label: 'Logs' },
   { to: '/settings', icon: Settings, label: 'Settings' },
   { to: '/about', icon: Info, label: 'About' },
