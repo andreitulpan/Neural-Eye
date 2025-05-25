@@ -146,7 +146,7 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 
-//builder.Services.AddHostedService<MqttService>();
+builder.Services.AddHostedService<MqttService>();
 builder.Services.AddSingleton<ILatestImageStore, LatestImageStore>();
 builder.Services.AddSingleton<IWebSocketHandler, WebSocketHandler>();
 builder.Services.AddSingleton<ITextExtractionService, TextExtractionService>();
