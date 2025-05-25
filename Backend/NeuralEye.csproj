@@ -6,22 +6,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
-    <ItemGroup Condition="$([MSBuild]::IsOSPlatform('Linux'))">
-	    <None Include="/usr/lib/x86_64-linux-gnu/liblept.so">
-		    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		    <TargetPath>x64/libleptonica-1.82.0.so</TargetPath>
-	    </None>
-	    <None Include="/usr/lib/x86_64-linux-gnu/libdl.so.2">
-		    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		    <TargetPath>x64/libdl.so</TargetPath>
-	    </None>
-	    <None Include="/usr/lib/x86_64-linux-gnu/libtesseract.so.5">
-		    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		    <TargetPath>x64/libtesseract50.so</TargetPath>
-	    </None>
-    </ItemGroup>
-
   <ItemGroup>
+    <PackageReference Include="IronOcr" Version="2025.5.11" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Abstractions" Version="2.3.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.3" />
@@ -38,7 +24,6 @@
     <PackageReference Include="MQTTnet" Version="4.3.2" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="7.3.1" />
-    <PackageReference Include="Tesseract" Version="5.2.0" />
   </ItemGroup>
 
   <ItemGroup>
