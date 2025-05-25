@@ -136,7 +136,7 @@ const Navbar = () => {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>
-                {user?.fullName || 'My Account'}
+                {user?.name || 'My Account'}
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => navigate('/settings')}>Profile</DropdownMenuItem>
