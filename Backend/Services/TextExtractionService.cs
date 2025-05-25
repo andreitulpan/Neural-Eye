@@ -1,22 +1,33 @@
-﻿using Tesseract;
+﻿using IronOcr;
+using Microsoft.AspNetCore.Hosting.Server;
 
 namespace NeuralEye.Services
 {
     public class TextExtractionService : ITextExtractionService
     {
+        private readonly IConfiguration _configuration;
+
+        public TextExtractionService(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
+
         public string ExtractText(string image)
         {
-            var tessdataPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, @"..\..\..\tessdata"));
+            var key = _configuration["IronOCR:Key"];
+            License.LicenseKey = key;
 
-            var ocrEngine = new TesseractEngine(tessdataPath, "eng", EngineMode.Default);
+            var Ocr = new IronTesseract();
 
-            var bytes = ConvertHexStringToByteArray(image);
+            var imageBytes = ConvertHexStringToByteArray(image);
+            var input = new OcrInput();
 
-            var img = Pix.LoadFromMemory(bytes);
-            var page = ocrEngine.Process(img);
-            var text = page.GetText();
+            input.LoadImage(imageBytes);
 
-            return text;
+            var result = Ocr.Read(input);
+            Console.WriteLine(result.Text);
+
+            return result.Text;
         }
 
         public byte[] ConvertHexStringToByteArray(string image)
