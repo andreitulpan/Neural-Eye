@@ -58,7 +58,7 @@ Base URL: `https://neuraleye.thezion.one`
 
 ## Image Processing Endpoints
 
-### 4. Save Image with OCR
+### 3. Save Image with OCR
 - **Endpoint:** `/api/stream/saveimage`
 - **Method:** `POST`
 - **Requires Bearer Token:** Yes
@@ -89,7 +89,7 @@ Content-Type: application/json
 
 ---
 
-### 5. Get User Images
+### 4. Get User Images
 - **Endpoint:** `/api/stream/getimages/{userId}`
 - **Method:** `GET`
 - **Requires Bearer Token:** Yes
@@ -121,7 +121,7 @@ Authorization: Bearer <token>
 
 1. **Registration/Login:** Use endpoints 1 or 2 to authenticate
 2. **Token Storage:** Store the received token in localStorage
-3. **Authenticated Requests:** Include the token in the Authorization header for endpoints 4 and 5
+3. **Authenticated Requests:** Include the token in the Authorization header for endpoints 3 and 4
 
 ## Error Handling
 
