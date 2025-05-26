@@ -11,42 +11,14 @@ import { useWebSocketImageStream } from '@/hooks/useWebSocketImageStream';
 import { useAuth } from '@/contexts/AuthContext';
 import { authService } from '@/services/authService';
 
-// Mock device data
+// Single camera device
 const mockDevices = [
   {
     id: '1',
-    name: 'Front Door Camera',
+    name: 'Camera',
     type: 'ESP32-CAM',
     status: 'online',
-    location: 'Front Entrance',
-  },
-  {
-    id: '2',
-    name: 'Backyard Camera',
-    type: 'ESP32-CAM',
-    status: 'offline',
-    location: 'Backyard',
-  },
-  {
-    id: '3',
-    name: 'Garage Camera',
-    type: 'ESP32-CAM',
-    status: 'online',
-    location: 'Garage',
-  },
-  {
-    id: '4',
-    name: 'Kitchen Camera',
-    type: 'ESP32-CAM',
-    status: 'maintenance',
-    location: 'Kitchen',
-  },
-  {
-    id: '5',
-    name: 'Living Room Camera',
-    type: 'ESP32-CAM',
-    status: 'online',
-    location: 'Living Room',
+    location: 'Entrance',
   },
 ];
 
@@ -59,18 +31,39 @@ const StreamView = () => {
   const [muted, setMuted] = useState(true);
   const [activeTab, setActiveTab] = useState('live');
   const [isExtracting, setIsExtracting] = useState(false);
+  const [imageUpdateCount, setImageUpdateCount] = useState(0);
   
-  // WebSocket connection for Front Door Camera (id: '1')
+  // WebSocket connection for Camera (id: '1')
   const { 
     isConnected: wsConnected, 
     currentImage, 
     connectionError,
-    imageKey // Get the key for forcing re-renders
+    imageKey
   } = useWebSocketImageStream({
     url: 'wss://neuraleye.thezion.one/ws',
     deviceId: id === '1' ? 'front-door-camera' : undefined,
     autoConnect: id === '1' && activeTab === 'live'
   });
+
+  // Force component update when image changes
+  useEffect(() => {
+    if (currentImage) {
+      console.log('Current image changed, forcing update. Image key:', imageKey);
+      setImageUpdateCount(prev => prev + 1);
+      
+      // Force a repaint by manipulating the DOM
+      const streamContainer = document.getElementById('streamVideo');
+      if (streamContainer) {
+        // Trigger a layout recalculation
+        streamContainer.style.willChange = 'transform';
+        streamContainer.offsetHeight; // Force reflow
+        
+        requestAnimationFrame(() => {
+          streamContainer.style.willChange = 'auto';
+        });
+      }
+    }
+  }, [currentImage, imageKey]);
   
   useEffect(() => {
     // Simulate API call to get device details
@@ -132,14 +125,11 @@ const StreamView = () => {
 
     setIsExtracting(true);
     try {
-      // Extract base64 data from data URL or use object URL
       let base64Data: string;
       
       if (currentImage.startsWith('data:')) {
-        // Data URL format
         base64Data = currentImage.split(',')[1] || currentImage;
       } else if (currentImage.startsWith('blob:')) {
-        // Object URL format - convert to base64
         const response = await fetch(currentImage);
         const blob = await response.blob();
         const reader = new FileReader();
@@ -154,19 +144,16 @@ const StreamView = () => {
           reader.readAsDataURL(blob);
         });
       } else {
-        // Assume it's already base64
         base64Data = currentImage;
       }
       
       const response = await authService.saveImage(base64Data, user.id);
       
-      // Check if text extraction was successful
       if (response.text && response.text.trim() !== '') {
         toast.success("Image saved and text extracted!", {
           description: `Extracted: ${response.text.substring(0, 100)}...`
         });
       } else {
-        // Image was saved but no text was found
         toast.success("Image saved successfully!");
         toast.error("Failed to extract text from image", {
           description: "No readable text was found in the image"
@@ -187,7 +174,6 @@ const StreamView = () => {
   };
   
   const getStreamContent = () => {
-    // For Front Door Camera (id: '1'), show WebSocket stream
     if (id === '1') {
       if (device.status !== 'online') {
         return (
@@ -224,17 +210,36 @@ const StreamView = () => {
       if (currentImage) {
         return (
           <img 
-            key={`stream-image-${imageKey}`} // Use imageKey to force re-renders
+            key={`stream-${imageKey}-${imageUpdateCount}-${Date.now()}`}
             src={currentImage} 
             alt="Live camera feed" 
             className="w-full h-full object-cover"
-            style={{ imageRendering: 'auto' }} // Ensure proper image rendering
+            style={{ 
+              imageRendering: 'auto',
+              display: 'block',
+              transform: 'translateZ(0)', // Force hardware acceleration
+              backfaceVisibility: 'hidden', // Optimize rendering
+              willChange: 'auto'
+            }}
             onLoad={(e) => {
-              console.log('Image loaded successfully, dimensions:', e.currentTarget.naturalWidth, 'x', e.currentTarget.naturalHeight);
+              console.log('=== IMAGE LOADED ===');
+              console.log('Stream image loaded successfully, dimensions:', e.currentTarget.naturalWidth, 'x', e.currentTarget.naturalHeight);
+              console.log('Image key:', imageKey, 'Update count:', imageUpdateCount);
+              
+              // Force a repaint after image loads
+              const target = e.currentTarget;
+              target.style.opacity = '0.999';
+              requestAnimationFrame(() => {
+                target.style.opacity = '1';
+                // Force another layout calculation
+                target.offsetHeight;
+              });
             }}
             onError={(e) => {
-              console.error('Image failed to load:', e);
-              console.error('Image src:', currentImage.substring(0, 100));
+              console.error('=== IMAGE ERROR ===');
+              console.error('Stream image failed to load');
+              console.error('Image src length:', currentImage?.length || 0);
+              console.error('Image starts with:', currentImage?.substring(0, 50) || 'null');
             }}
           />
         );
@@ -250,25 +255,10 @@ const StreamView = () => {
       );
     }
 
-    // For other cameras, show placeholder
     return (
-      <>
-        <div 
-          className="flex items-center justify-center h-full w-full text-white"
-          style={{ 
-            backgroundImage: 'url(https://placehold.co/1280x720/1e1e2e/e0e0e0?text=Live+Stream)',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center'
-          }}
-        />
-        {device.status !== 'online' && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/70">
-            <p className="text-xl font-semibold text-white">
-              {device.status === 'offline' ? 'Camera Offline' : 'Camera in Maintenance Mode'}
-            </p>
-          </div>
-        )}
-      </>
+      <div className="absolute inset-0 flex items-center justify-center bg-black/70">
+        <p className="text-xl font-semibold text-white">Device not found</p>
+      </div>
     );
   };
   
@@ -297,7 +287,14 @@ const StreamView = () => {
               <Card className="border-border bg-dashboard-card">
                 <CardContent className="p-0">
                   <div className="relative bg-black aspect-video w-full">
-                    <div id="streamVideo" className="relative h-full w-full">
+                    <div 
+                      id="streamVideo" 
+                      className="relative h-full w-full"
+                      style={{
+                        transform: 'translateZ(0)', // Force hardware acceleration
+                        willChange: 'auto'
+                      }}
+                    >
                       {getStreamContent()}
                     </div>
                     
