@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
@@ -81,9 +80,6 @@ const Images = () => {
           <div className="flex justify-between items-start">
             <div>
               <CardTitle className="text-lg text-card-foreground">Image #{image.id}</CardTitle>
-              <CardDescription>
-                User ID: {image.user_id}
-              </CardDescription>
             </div>
             <Badge variant="outline">
               {image.extractedText ? 'Text Found' : 'No Text'}
@@ -99,7 +95,7 @@ const Images = () => {
                 <img 
                   src={base64Image} 
                   alt={`Captured image ${image.id}`}
-                  className="w-full h-48 object-cover rounded border border-border"
+                  className="w-full h-auto rounded border border-border"
                   onError={(e) => {
                     console.error('Image failed to load:', e);
                     console.log('Image src:', base64Image.substring(0, 100) + '...');
