@@ -48,13 +48,13 @@ const Sidebar = () => {
       {/* Sidebar */}
       <aside 
         className={cn(
-          "fixed md:relative w-64 h-full bg-dashboard-card border-r border-border z-50 transition-transform duration-300 flex flex-col",
+          "fixed md:relative w-64 h-full bg-white border-r border-gray-200 z-50 transition-transform duration-300 flex flex-col",
           isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         )}
       >
-        <div className="p-4 border-b border-border">
+        <div className="p-4 border-b border-gray-200">
           <h1 className="text-xl font-bold">NeuralEye</h1>
-          <p className="text-xs text-muted-foreground">IoT Video Monitoring</p>
+          <p className="text-xs text-gray-600">IoT Video Monitoring</p>
         </div>
         
         <nav className="p-2 flex-1">
@@ -68,8 +68,8 @@ const Sidebar = () => {
                     cn(
                       "flex items-center gap-3 px-3 py-2 rounded-md transition-colors",
                       isActive
-                        ? "bg-primary text-primary-foreground"
-                        : "hover:bg-secondary text-foreground"
+                        ? "bg-blue-500 text-white"
+                        : "hover:bg-gray-100 text-gray-700"
                     )
                   }
                 >
@@ -81,10 +81,10 @@ const Sidebar = () => {
           </ul>
         </nav>
         
-        <div className="p-2 border-t border-border">
+        <div className="p-2 border-t border-gray-200">
           <Button 
             variant="ghost" 
-            className="w-full justify-start gap-3 text-destructive hover:text-destructive hover:bg-destructive/10"
+            className="w-full justify-start gap-3 text-red-600 hover:text-red-600 hover:bg-red-50"
             onClick={handleLogout}
           >
             <LogOut className="h-5 w-5" />

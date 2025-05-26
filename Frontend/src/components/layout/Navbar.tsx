@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Bell, Menu, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -78,7 +77,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-dashboard-card border-b border-border p-4">
+    <nav className="bg-white border-b border-gray-200 p-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setIsOpen(prev => !prev)}>
@@ -93,7 +92,7 @@ const Navbar = () => {
               <Button variant="ghost" size="icon" className="relative">
                 <Bell className="h-5 w-5" />
                 {unreadCount > 0 && (
-                  <span className="absolute top-1 right-1 w-2 h-2 bg-status-error rounded-full"></span>
+                  <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
                 )}
               </Button>
             </PopoverTrigger>
@@ -111,16 +110,16 @@ const Navbar = () => {
                   notifications.map((notification) => (
                     <div 
                       key={notification.id} 
-                      className={`p-3 text-sm rounded-md ${notification.read ? 'bg-transparent' : 'bg-muted'}`}
+                      className={`p-3 text-sm rounded-md ${notification.read ? 'bg-transparent' : 'bg-gray-50'}`}
                       onClick={() => markAsRead(notification.id)}
                     >
                       <div className="font-medium">{notification.title}</div>
-                      <div className="text-muted-foreground">{notification.description}</div>
-                      <div className="text-xs text-muted-foreground mt-1">{notification.time}</div>
+                      <div className="text-gray-600">{notification.description}</div>
+                      <div className="text-xs text-gray-500 mt-1">{notification.time}</div>
                     </div>
                   ))
                 ) : (
-                  <div className="text-center py-4 text-sm text-muted-foreground">
+                  <div className="text-center py-4 text-sm text-gray-500">
                     No notifications
                   </div>
                 )}
