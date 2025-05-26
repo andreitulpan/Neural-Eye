@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Download, Maximize2, Settings, Volume2, VolumeX } from 'lucide-react';
+import { ArrowLeft, FileText, Maximize2, Settings, Volume2, VolumeX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -9,6 +8,8 @@ import { toast } from 'sonner';
 import { SidebarProvider } from '@/components/layout/SidebarContext';
 import AppLayout from '@/components/layout/AppLayout';
 import { useWebSocketImageStream } from '@/hooks/useWebSocketImageStream';
+import { useAuth } from '@/contexts/AuthContext';
+import { authService } from '@/services/authService';
 
 // Mock device data
 const mockDevices = [
@@ -52,16 +53,19 @@ const mockDevices = [
 const StreamView = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [device, setDevice] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [muted, setMuted] = useState(true);
   const [activeTab, setActiveTab] = useState('live');
+  const [isExtracting, setIsExtracting] = useState(false);
   
   // WebSocket connection for Front Door Camera (id: '1')
   const { 
     isConnected: wsConnected, 
     currentImage, 
-    connectionError 
+    connectionError,
+    imageKey // Get the key for forcing re-renders
   } = useWebSocketImageStream({
     url: 'wss://neuraleye.thezion.one/ws',
     deviceId: id === '1' ? 'front-door-camera' : undefined,
@@ -120,9 +124,62 @@ const StreamView = () => {
     }
   };
   
-  const handleSnapshot = () => {
-    // In a real app, this would take a snapshot of the current frame
-    toast.success("Snapshot taken");
+  const handleSaveAndExtract = async () => {
+    if (!currentImage || !user) {
+      toast.error("No image available or user not authenticated");
+      return;
+    }
+
+    setIsExtracting(true);
+    try {
+      // Extract base64 data from data URL or use object URL
+      let base64Data: string;
+      
+      if (currentImage.startsWith('data:')) {
+        // Data URL format
+        base64Data = currentImage.split(',')[1] || currentImage;
+      } else if (currentImage.startsWith('blob:')) {
+        // Object URL format - convert to base64
+        const response = await fetch(currentImage);
+        const blob = await response.blob();
+        const reader = new FileReader();
+        
+        base64Data = await new Promise((resolve, reject) => {
+          reader.onload = () => {
+            const result = reader.result as string;
+            const base64 = result.split(',')[1] || result;
+            resolve(base64);
+          };
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+      } else {
+        // Assume it's already base64
+        base64Data = currentImage;
+      }
+      
+      const response = await authService.saveImage(base64Data, user.id);
+      
+      // Check if text extraction was successful
+      if (response.text && response.text.trim() !== '') {
+        toast.success("Image saved and text extracted!", {
+          description: `Extracted: ${response.text.substring(0, 100)}...`
+        });
+      } else {
+        // Image was saved but no text was found
+        toast.success("Image saved successfully!");
+        toast.error("Failed to extract text from image", {
+          description: "No readable text was found in the image"
+        });
+      }
+      
+      console.log('Extracted text:', response.text);
+    } catch (error) {
+      console.error('Error saving image and extracting text:', error);
+      toast.error("Failed to extract text from image");
+    } finally {
+      setIsExtracting(false);
+    }
   };
   
   const handleEdit = () => {
@@ -167,9 +224,18 @@ const StreamView = () => {
       if (currentImage) {
         return (
           <img 
+            key={`stream-image-${imageKey}`} // Use imageKey to force re-renders
             src={currentImage} 
             alt="Live camera feed" 
             className="w-full h-full object-cover"
+            style={{ imageRendering: 'auto' }} // Ensure proper image rendering
+            onLoad={(e) => {
+              console.log('Image loaded successfully, dimensions:', e.currentTarget.naturalWidth, 'x', e.currentTarget.naturalHeight);
+            }}
+            onError={(e) => {
+              console.error('Image failed to load:', e);
+              console.error('Image src:', currentImage.substring(0, 100));
+            }}
           />
         );
       }
@@ -265,9 +331,11 @@ const StreamView = () => {
                             variant="ghost" 
                             size="icon" 
                             className="rounded-full bg-white/10 hover:bg-white/20 text-white"
-                            onClick={handleSnapshot}
+                            onClick={handleSaveAndExtract}
+                            disabled={isExtracting || !currentImage}
+                            title="Save image and extract text"
                           >
-                            <Download className="h-4 w-4" />
+                            <FileText className="h-4 w-4" />
                           </Button>
                           <Button 
                             variant="ghost" 

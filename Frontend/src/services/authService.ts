@@ -7,7 +7,7 @@ export interface LoginRequest {
 }
 
 export interface RegisterRequest {
-  fullName: string;
+  name: string;
   email: string;
   password: string;
 }
@@ -17,6 +17,9 @@ export interface ForgotPasswordRequest {
 }
 
 export interface LoginResponse {
+  id: number;
+  name: string;
+  email: string;
   token: string;
 }
 
@@ -24,34 +27,35 @@ export interface RegisterResponse {
   message: string;
 }
 
+export interface SaveImageResponse {
+  success: boolean;
+  text: string;
+  message: string;
+}
+
 export const authService = {
-  /**
-   * Log in a user
-   */
   async login(credentials: LoginRequest): Promise<LoginResponse> {
-    return api.post<LoginResponse>("/api/auth/login", credentials, { isPublic: true });
+    return api.post<LoginResponse>("/api/auth/login", credentials);
   },
 
-  /**
-   * Register a new user
-   */
   async register(data: RegisterRequest): Promise<RegisterResponse> {
-    return api.post<RegisterResponse>("/api/auth/register", data, { isPublic: true });
+    return api.post<RegisterResponse>("/api/auth/register", data);
   },
 
-  /**
-   * Request a password reset
-   */
   async forgotPassword(data: ForgotPasswordRequest): Promise<{ success: boolean }> {
-    return api.post<{ success: boolean }>("/api/auth/forgot-password", data, { isPublic: true });
+    return api.post<{ success: boolean }>("/api/auth/forgot-password", data);
   },
 
-  /**
-   * Log out the current user
-   */
-  logout(): void {
+  async saveImage(imageData: string, userId: string): Promise<SaveImageResponse> {
+    return api.post<SaveImageResponse>("/api/stream/saveimage", {
+      imageData,
+      userId
+    });
+  },
+
+  logout() {
     localStorage.removeItem("authToken");
-    localStorage.removeItem("isAuthenticated");
     localStorage.removeItem("user");
+    localStorage.removeItem("isAuthenticated");
   }
 };

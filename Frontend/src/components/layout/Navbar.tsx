@@ -78,22 +78,22 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-dashboard-card border-b border-border p-4">
+    <nav className="bg-card border-b border-border p-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setIsOpen(prev => !prev)}>
+          <Button variant="ghost" size="icon" className="md:hidden text-card-foreground" onClick={() => setIsOpen(prev => !prev)}>
             <Menu className="h-5 w-5" />
           </Button>
-          <h1 className="text-xl font-semibold">NeuralEye</h1>
+          <h1 className="text-xl font-semibold text-card-foreground">NeuralEye</h1>
         </div>
 
         <div className="flex items-center gap-2">
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="ghost" size="icon" className="relative">
+              <Button variant="ghost" size="icon" className="relative text-card-foreground">
                 <Bell className="h-5 w-5" />
                 {unreadCount > 0 && (
-                  <span className="absolute top-1 right-1 w-2 h-2 bg-status-error rounded-full"></span>
+                  <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
                 )}
               </Button>
             </PopoverTrigger>
@@ -130,13 +130,13 @@ const Navbar = () => {
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full">
+              <Button variant="ghost" size="icon" className="rounded-full text-card-foreground">
                 <User className="h-5 w-5" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>
-                {user?.fullName || 'My Account'}
+                {user?.name || 'My Account'}
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => navigate('/settings')}>Profile</DropdownMenuItem>

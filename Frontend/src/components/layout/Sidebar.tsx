@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Home, Camera, Settings, Info, List, LogOut } from 'lucide-react';
+import { Home, Camera, Settings, Info, List, LogOut, Images } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useSidebar } from './SidebarContext';
 import { cn } from '@/lib/utils';
@@ -11,6 +11,7 @@ import { useAuth } from '@/contexts/AuthContext';
 const navItems = [
   { to: '/dashboard', icon: Home, label: 'Dashboard' },
   { to: '/devices', icon: Camera, label: 'Devices' },
+  { to: '/images', icon: Images, label: 'Images' },
   { to: '/logs', icon: List, label: 'Logs' },
   { to: '/settings', icon: Settings, label: 'Settings' },
   { to: '/about', icon: Info, label: 'About' },
@@ -47,13 +48,13 @@ const Sidebar = () => {
       {/* Sidebar */}
       <aside 
         className={cn(
-          "fixed md:relative w-64 h-full bg-dashboard-card border-r border-border z-50 transition-transform duration-300 flex flex-col",
+          "fixed md:relative w-64 h-full bg-sidebar border-r border-sidebar-border z-50 transition-transform duration-300 flex flex-col",
           isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         )}
       >
-        <div className="p-4 border-b border-border">
-          <h1 className="text-xl font-bold">NeuralEye</h1>
-          <p className="text-xs text-muted-foreground">IoT Video Monitoring</p>
+        <div className="p-4 border-b border-sidebar-border">
+          <h1 className="text-xl font-bold text-sidebar-foreground">NeuralEye</h1>
+          <p className="text-xs text-sidebar-foreground/70">IoT Video Monitoring</p>
         </div>
         
         <nav className="p-2 flex-1">
@@ -67,8 +68,8 @@ const Sidebar = () => {
                     cn(
                       "flex items-center gap-3 px-3 py-2 rounded-md transition-colors",
                       isActive
-                        ? "bg-primary text-primary-foreground"
-                        : "hover:bg-secondary text-foreground"
+                        ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                        : "hover:bg-sidebar-accent text-sidebar-foreground hover:text-sidebar-accent-foreground"
                     )
                   }
                 >
@@ -80,10 +81,10 @@ const Sidebar = () => {
           </ul>
         </nav>
         
-        <div className="p-2 border-t border-border">
+        <div className="p-2 border-t border-sidebar-border">
           <Button 
             variant="ghost" 
-            className="w-full justify-start gap-3 text-destructive hover:text-destructive hover:bg-destructive/10"
+            className="w-full justify-start gap-3 text-red-400 hover:text-red-300 hover:bg-red-500/10"
             onClick={handleLogout}
           >
             <LogOut className="h-5 w-5" />
