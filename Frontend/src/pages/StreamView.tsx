@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, FileText, Maximize2, Settings, Volume2, VolumeX } from 'lucide-react';
@@ -31,7 +32,6 @@ const StreamView = () => {
   const [muted, setMuted] = useState(true);
   const [activeTab, setActiveTab] = useState('live');
   const [isExtracting, setIsExtracting] = useState(false);
-  const [imageUpdateCount, setImageUpdateCount] = useState(0);
   
   // WebSocket connection for Camera (id: '1')
   const { 
@@ -44,26 +44,6 @@ const StreamView = () => {
     deviceId: id === '1' ? 'front-door-camera' : undefined,
     autoConnect: id === '1' && activeTab === 'live'
   });
-
-  // Force component update when image changes
-  useEffect(() => {
-    if (currentImage) {
-      console.log('Current image changed, forcing update. Image key:', imageKey);
-      setImageUpdateCount(prev => prev + 1);
-      
-      // Force a repaint by manipulating the DOM
-      const streamContainer = document.getElementById('streamVideo');
-      if (streamContainer) {
-        // Trigger a layout recalculation
-        streamContainer.style.willChange = 'transform';
-        streamContainer.offsetHeight; // Force reflow
-        
-        requestAnimationFrame(() => {
-          streamContainer.style.willChange = 'auto';
-        });
-      }
-    }
-  }, [currentImage, imageKey]);
   
   useEffect(() => {
     // Simulate API call to get device details
@@ -210,36 +190,15 @@ const StreamView = () => {
       if (currentImage) {
         return (
           <img 
-            key={`stream-${imageKey}-${imageUpdateCount}-${Date.now()}`}
+            key={`stream-${imageKey}`}
             src={currentImage} 
             alt="Live camera feed" 
             className="w-full h-full object-cover"
-            style={{ 
-              imageRendering: 'auto',
-              display: 'block',
-              transform: 'translateZ(0)', // Force hardware acceleration
-              backfaceVisibility: 'hidden', // Optimize rendering
-              willChange: 'auto'
+            onLoad={() => {
+              console.log('Stream image loaded successfully');
             }}
-            onLoad={(e) => {
-              console.log('=== IMAGE LOADED ===');
-              console.log('Stream image loaded successfully, dimensions:', e.currentTarget.naturalWidth, 'x', e.currentTarget.naturalHeight);
-              console.log('Image key:', imageKey, 'Update count:', imageUpdateCount);
-              
-              // Force a repaint after image loads
-              const target = e.currentTarget;
-              target.style.opacity = '0.999';
-              requestAnimationFrame(() => {
-                target.style.opacity = '1';
-                // Force another layout calculation
-                target.offsetHeight;
-              });
-            }}
-            onError={(e) => {
-              console.error('=== IMAGE ERROR ===');
+            onError={() => {
               console.error('Stream image failed to load');
-              console.error('Image src length:', currentImage?.length || 0);
-              console.error('Image starts with:', currentImage?.substring(0, 50) || 'null');
             }}
           />
         );
@@ -287,14 +246,7 @@ const StreamView = () => {
               <Card className="border-border bg-dashboard-card">
                 <CardContent className="p-0">
                   <div className="relative bg-black aspect-video w-full">
-                    <div 
-                      id="streamVideo" 
-                      className="relative h-full w-full"
-                      style={{
-                        transform: 'translateZ(0)', // Force hardware acceleration
-                        willChange: 'auto'
-                      }}
-                    >
+                    <div id="streamVideo" className="relative h-full w-full">
                       {getStreamContent()}
                     </div>
                     

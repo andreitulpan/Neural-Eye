@@ -20,25 +20,8 @@ export const useWebSocketImageStream = ({
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const imageUrlRef = useRef<string | null>(null);
 
-  // Force a DOM repaint by triggering a layout recalculation
-  const forceRepaint = useCallback(() => {
-    const streamElement = document.getElementById('streamVideo');
-    if (streamElement) {
-      // Force a reflow by reading offsetHeight
-      const height = streamElement.offsetHeight;
-      console.log('Forced repaint, element height:', height);
-      
-      // Also try to force a repaint using a small style change
-      streamElement.style.transform = 'translateZ(0)';
-      requestAnimationFrame(() => {
-        streamElement.style.transform = '';
-      });
-    }
-  }, []);
-
   const updateImage = useCallback((imageUrl: string) => {
-    console.log('=== IMAGE UPDATE START ===');
-    console.log('Updating image with new data, URL type:', imageUrl.startsWith('blob:') ? 'blob' : 'data', 'length:', imageUrl.length);
+    console.log('Updating image with new data, URL type:', imageUrl.startsWith('blob:') ? 'blob' : 'data');
     
     // Clean up previous object URL if it exists
     if (imageUrlRef.current && imageUrlRef.current.startsWith('blob:')) {
@@ -46,32 +29,13 @@ export const useWebSocketImageStream = ({
       URL.revokeObjectURL(imageUrlRef.current);
     }
     
-    // Create a unique URL every time to force refresh
-    const uniqueUrl = imageUrl.startsWith('data:') 
-      ? `${imageUrl}#${Date.now()}-${Math.random()}` 
-      : `${imageUrl}?t=${Date.now()}&r=${Math.random()}`;
+    // Store the new image URL
+    imageUrlRef.current = imageUrl;
     
-    console.log('Setting new image URL, unique suffix added');
-    
-    // Store the new image URL and update state
-    imageUrlRef.current = uniqueUrl;
-    
-    // Force state updates in the next tick
-    setTimeout(() => {
-      setCurrentImage(uniqueUrl);
-      setImageKey(prev => {
-        const newKey = prev + 1;
-        console.log('Updated image key to:', newKey);
-        return newKey;
-      });
-      
-      // Force repaint after state update
-      setTimeout(() => {
-        forceRepaint();
-        console.log('=== IMAGE UPDATE COMPLETE ===');
-      }, 0);
-    }, 0);
-  }, [forceRepaint]);
+    // Update state with the new image
+    setCurrentImage(imageUrl);
+    setImageKey(prev => prev + 1);
+  }, []);
 
   const connect = useCallback(() => {
     if (wsRef.current && (wsRef.current.readyState === WebSocket.CONNECTING || wsRef.current.readyState === WebSocket.OPEN)) {
@@ -86,7 +50,7 @@ export const useWebSocketImageStream = ({
       ws.binaryType = 'blob';
       
       ws.onopen = () => {
-        console.log('WebSocket connected successfully, binaryType:', ws.binaryType);
+        console.log('WebSocket connected successfully');
         setIsConnected(true);
         setConnectionError(null);
         
@@ -100,16 +64,15 @@ export const useWebSocketImageStream = ({
       };
 
       ws.onmessage = (event) => {
-        console.log('Received WebSocket message, data type:', typeof event.data, 'constructor:', event.data.constructor.name);
+        console.log('Received WebSocket message, data type:', typeof event.data);
         
         try {
           if (event.data instanceof Blob) {
-            console.log('Processing Blob data, size:', event.data.size, 'type:', event.data.type);
+            console.log('Processing Blob data, size:', event.data.size);
             
             const reader = new FileReader();
             reader.onload = () => {
               const base64 = reader.result as string;
-              console.log('Blob converted to base64, length:', base64.length);
               updateImage(base64);
             };
             reader.onerror = (error) => {
@@ -123,7 +86,6 @@ export const useWebSocketImageStream = ({
             const reader = new FileReader();
             reader.onload = () => {
               const base64 = reader.result as string;
-              console.log('ArrayBuffer converted to base64, length:', base64.length);
               updateImage(base64);
             };
             reader.onerror = (error) => {
@@ -132,24 +94,22 @@ export const useWebSocketImageStream = ({
             reader.readAsDataURL(blob);
             
           } else if (typeof event.data === 'string') {
-            console.log('Processing string data, length:', event.data.length);
+            console.log('Processing string data');
             
             try {
               const data = JSON.parse(event.data);
               if (data.type === 'image' && data.data) {
                 const imageUrl = data.data.startsWith('data:') ? data.data : `data:image/jpeg;base64,${data.data}`;
-                console.log('JSON image data processed, length:', imageUrl.length);
                 updateImage(imageUrl);
               } else {
                 console.log('Received non-image JSON message:', data);
               }
             } catch (jsonError) {
               const imageUrl = event.data.startsWith('data:') ? event.data : `data:image/jpeg;base64,${event.data}`;
-              console.log('String treated as base64 image, length:', imageUrl.length);
               updateImage(imageUrl);
             }
           } else {
-            console.warn('Unknown message format:', typeof event.data, event.data);
+            console.warn('Unknown message format:', typeof event.data);
           }
         } catch (error) {
           console.error('Error processing WebSocket message:', error);
