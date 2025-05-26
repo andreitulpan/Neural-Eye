@@ -3,7 +3,7 @@ import { api } from "./api";
 
 export interface ImageRecord {
   id: number;
-  imageData: string;
+  imageData: Uint8Array | ArrayBuffer | number[] | string | any; // varbinary can come in various formats
   extractedText: string;
   user_id: string;
 }
