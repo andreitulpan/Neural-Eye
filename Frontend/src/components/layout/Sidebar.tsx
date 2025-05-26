@@ -48,13 +48,13 @@ const Sidebar = () => {
       {/* Sidebar */}
       <aside 
         className={cn(
-          "fixed md:relative w-64 h-full bg-white border-r border-gray-200 z-50 transition-transform duration-300 flex flex-col",
+          "fixed md:relative w-64 h-full bg-sidebar border-r border-sidebar-border z-50 transition-transform duration-300 flex flex-col",
           isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         )}
       >
-        <div className="p-4 border-b border-gray-200">
-          <h1 className="text-xl font-bold">NeuralEye</h1>
-          <p className="text-xs text-gray-600">IoT Video Monitoring</p>
+        <div className="p-4 border-b border-sidebar-border">
+          <h1 className="text-xl font-bold text-sidebar-foreground">NeuralEye</h1>
+          <p className="text-xs text-sidebar-foreground/70">IoT Video Monitoring</p>
         </div>
         
         <nav className="p-2 flex-1">
@@ -68,8 +68,8 @@ const Sidebar = () => {
                     cn(
                       "flex items-center gap-3 px-3 py-2 rounded-md transition-colors",
                       isActive
-                        ? "bg-blue-500 text-white"
-                        : "hover:bg-gray-100 text-gray-700"
+                        ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                        : "hover:bg-sidebar-accent text-sidebar-foreground hover:text-sidebar-accent-foreground"
                     )
                   }
                 >
@@ -81,10 +81,10 @@ const Sidebar = () => {
           </ul>
         </nav>
         
-        <div className="p-2 border-t border-gray-200">
+        <div className="p-2 border-t border-sidebar-border">
           <Button 
             variant="ghost" 
-            className="w-full justify-start gap-3 text-red-600 hover:text-red-600 hover:bg-red-50"
+            className="w-full justify-start gap-3 text-red-400 hover:text-red-300 hover:bg-red-500/10"
             onClick={handleLogout}
           >
             <LogOut className="h-5 w-5" />

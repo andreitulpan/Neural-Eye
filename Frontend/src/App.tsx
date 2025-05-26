@@ -1,10 +1,11 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
-import { SidebarProvider } from "./components/layout/SidebarProvider";
+import { SidebarProvider } from "./components/layout/SidebarContext";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import LogsPage from "./pages/Logs";
