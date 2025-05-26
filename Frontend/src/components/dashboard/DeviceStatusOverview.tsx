@@ -4,13 +4,9 @@ import { Link } from 'react-router-dom';
 import { Camera, Wifi, WifiOff, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-// Mock data for demo purposes
+// Single camera device
 const devices = [
-  { id: 1, name: 'Front Door Camera', location: 'Entrance', status: 'online', alerts: 0 },
-  { id: 2, name: 'Backyard Camera', location: 'Garden', status: 'online', alerts: 2 },
-  { id: 3, name: 'Garage Camera', location: 'Garage', status: 'offline', alerts: 0 },
-  { id: 4, name: 'Living Room Camera', location: 'Indoor', status: 'online', alerts: 0 },
-  { id: 5, name: 'Kitchen Camera', location: 'Indoor', status: 'warning', alerts: 1 },
+  { id: 1, name: 'Camera', location: 'Entrance', status: 'online', alerts: 0 },
 ];
 
 const DeviceStatusOverview = () => {

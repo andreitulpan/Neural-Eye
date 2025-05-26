@@ -11,42 +11,14 @@ import { useWebSocketImageStream } from '@/hooks/useWebSocketImageStream';
 import { useAuth } from '@/contexts/AuthContext';
 import { authService } from '@/services/authService';
 
-// Mock device data
+// Single camera device
 const mockDevices = [
   {
     id: '1',
-    name: 'Front Door Camera',
+    name: 'Camera',
     type: 'ESP32-CAM',
     status: 'online',
-    location: 'Front Entrance',
-  },
-  {
-    id: '2',
-    name: 'Backyard Camera',
-    type: 'ESP32-CAM',
-    status: 'offline',
-    location: 'Backyard',
-  },
-  {
-    id: '3',
-    name: 'Garage Camera',
-    type: 'ESP32-CAM',
-    status: 'online',
-    location: 'Garage',
-  },
-  {
-    id: '4',
-    name: 'Kitchen Camera',
-    type: 'ESP32-CAM',
-    status: 'maintenance',
-    location: 'Kitchen',
-  },
-  {
-    id: '5',
-    name: 'Living Room Camera',
-    type: 'ESP32-CAM',
-    status: 'online',
-    location: 'Living Room',
+    location: 'Entrance',
   },
 ];
 
@@ -60,7 +32,7 @@ const StreamView = () => {
   const [activeTab, setActiveTab] = useState('live');
   const [isExtracting, setIsExtracting] = useState(false);
   
-  // WebSocket connection for Front Door Camera (id: '1')
+  // WebSocket connection for Camera (id: '1')
   const { 
     isConnected: wsConnected, 
     currentImage, 
@@ -187,7 +159,7 @@ const StreamView = () => {
   };
   
   const getStreamContent = () => {
-    // For Front Door Camera (id: '1'), show WebSocket stream
+    // For Camera (id: '1'), show WebSocket stream
     if (id === '1') {
       if (device.status !== 'online') {
         return (
@@ -250,25 +222,11 @@ const StreamView = () => {
       );
     }
 
-    // For other cameras, show placeholder
+    // This shouldn't happen anymore since we only have one device
     return (
-      <>
-        <div 
-          className="flex items-center justify-center h-full w-full text-white"
-          style={{ 
-            backgroundImage: 'url(https://placehold.co/1280x720/1e1e2e/e0e0e0?text=Live+Stream)',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center'
-          }}
-        />
-        {device.status !== 'online' && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/70">
-            <p className="text-xl font-semibold text-white">
-              {device.status === 'offline' ? 'Camera Offline' : 'Camera in Maintenance Mode'}
-            </p>
-          </div>
-        )}
-      </>
+      <div className="absolute inset-0 flex items-center justify-center bg-black/70">
+        <p className="text-xl font-semibold text-white">Device not found</p>
+      </div>
     );
   };
   
