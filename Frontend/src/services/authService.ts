@@ -1,4 +1,3 @@
-
 import { api } from "./api";
 
 export interface LoginRequest {
@@ -39,7 +38,13 @@ export const authService = {
   },
 
   async register(data: RegisterRequest): Promise<RegisterResponse> {
-    return api.post<RegisterResponse>("/api/auth/register", data);
+    // Transform the request to use fullname instead of name
+    const requestBody = {
+      fullname: data.name,
+      email: data.email,
+      password: data.password
+    };
+    return api.post<RegisterResponse>("/api/auth/register", requestBody);
   },
 
   async forgotPassword(data: ForgotPasswordRequest): Promise<{ success: boolean }> {
