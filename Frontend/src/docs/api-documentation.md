@@ -22,7 +22,7 @@ Base URL: `https://neuraleye.thezion.one`
 **Response:**
 ```json
 {
-  "id": "number",
+  "id": "int",
   "name": "string",
   "email": "string",
   "token": "string"
@@ -128,8 +128,8 @@ Authorization: Bearer <token>
 ```json
 [
   {
-    "id": "number",
-    "imageData": "Uint8Array | ArrayBuffer | number[] | string", // Binary image data
+    "id": "int",
+    "imageData": "Uint8Array | ArrayBuffer | int[] | string", // Binary image data
     "extractedText": "string",
     "user_id": "string"
   }
