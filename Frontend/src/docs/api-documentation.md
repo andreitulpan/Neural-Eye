@@ -40,7 +40,7 @@ Base URL: `https://neuraleye.thezion.one`
 **Request Payload:**
 ```json
 {
-  "name": "string",
+  "fullname": "string",
   "email": "string",
   "password": "string"
 }
