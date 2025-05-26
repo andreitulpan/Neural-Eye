@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { PlusCircle, Settings, Trash2, Video } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -10,56 +9,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { SidebarProvider } from '@/components/layout/SidebarContext';
 import AppLayout from '@/components/layout/AppLayout';
 
-// Mock device data
+// Single camera device
 const mockDevices = [
   {
     id: '1',
-    name: 'Front Door Camera',
+    name: 'Camera',
     type: 'ESP32-CAM',
     status: 'online',
     lastSeen: new Date().toISOString(),
-    location: 'Front Entrance',
+    location: 'Entrance',
     ipAddress: '192.168.1.101',
-    firmware: 'v1.2.0',
-  },
-  {
-    id: '2',
-    name: 'Backyard Camera',
-    type: 'ESP32-CAM',
-    status: 'offline',
-    lastSeen: new Date(Date.now() - 3600000).toISOString(),
-    location: 'Backyard',
-    ipAddress: '192.168.1.102',
-    firmware: 'v1.1.8',
-  },
-  {
-    id: '3',
-    name: 'Garage Camera',
-    type: 'ESP32-CAM',
-    status: 'online',
-    lastSeen: new Date().toISOString(),
-    location: 'Garage',
-    ipAddress: '192.168.1.103',
-    firmware: 'v1.2.0',
-  },
-  {
-    id: '4',
-    name: 'Kitchen Camera',
-    type: 'ESP32-CAM',
-    status: 'maintenance',
-    lastSeen: new Date(Date.now() - 7200000).toISOString(),
-    location: 'Kitchen',
-    ipAddress: '192.168.1.104',
-    firmware: 'v1.1.9',
-  },
-  {
-    id: '5',
-    name: 'Living Room Camera',
-    type: 'ESP32-CAM',
-    status: 'online',
-    lastSeen: new Date().toISOString(),
-    location: 'Living Room',
-    ipAddress: '192.168.1.105',
     firmware: 'v1.2.0',
   },
 ];

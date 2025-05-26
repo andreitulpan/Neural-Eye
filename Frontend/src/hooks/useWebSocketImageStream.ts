@@ -15,12 +15,29 @@ export const useWebSocketImageStream = ({
   const [isConnected, setIsConnected] = useState(false);
   const [currentImage, setCurrentImage] = useState<string | null>(null);
   const [connectionError, setConnectionError] = useState<string | null>(null);
-  const [imageKey, setImageKey] = useState(0); // Add key for forcing re-renders
+  const [imageKey, setImageKey] = useState(0);
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const imageUrlRef = useRef<string | null>(null);
 
+  // Force a DOM repaint by triggering a layout recalculation
+  const forceRepaint = useCallback(() => {
+    const streamElement = document.getElementById('streamVideo');
+    if (streamElement) {
+      // Force a reflow by reading offsetHeight
+      const height = streamElement.offsetHeight;
+      console.log('Forced repaint, element height:', height);
+      
+      // Also try to force a repaint using a small style change
+      streamElement.style.transform = 'translateZ(0)';
+      requestAnimationFrame(() => {
+        streamElement.style.transform = '';
+      });
+    }
+  }, []);
+
   const updateImage = useCallback((imageUrl: string) => {
+    console.log('=== IMAGE UPDATE START ===');
     console.log('Updating image with new data, URL type:', imageUrl.startsWith('blob:') ? 'blob' : 'data', 'length:', imageUrl.length);
     
     // Clean up previous object URL if it exists
@@ -29,14 +46,34 @@ export const useWebSocketImageStream = ({
       URL.revokeObjectURL(imageUrlRef.current);
     }
     
+    // Create a unique URL every time to force refresh
+    const uniqueUrl = imageUrl.startsWith('data:') 
+      ? `${imageUrl}#${Date.now()}-${Math.random()}` 
+      : `${imageUrl}?t=${Date.now()}&r=${Math.random()}`;
+    
+    console.log('Setting new image URL, unique suffix added');
+    
     // Store the new image URL and update state
-    imageUrlRef.current = imageUrl;
-    setCurrentImage(imageUrl);
-    setImageKey(prev => prev + 1); // Force re-render
-  }, []);
+    imageUrlRef.current = uniqueUrl;
+    
+    // Force state updates in the next tick
+    setTimeout(() => {
+      setCurrentImage(uniqueUrl);
+      setImageKey(prev => {
+        const newKey = prev + 1;
+        console.log('Updated image key to:', newKey);
+        return newKey;
+      });
+      
+      // Force repaint after state update
+      setTimeout(() => {
+        forceRepaint();
+        console.log('=== IMAGE UPDATE COMPLETE ===');
+      }, 0);
+    }, 0);
+  }, [forceRepaint]);
 
   const connect = useCallback(() => {
-    // Don't create a new connection if one already exists and is connecting/open
     if (wsRef.current && (wsRef.current.readyState === WebSocket.CONNECTING || wsRef.current.readyState === WebSocket.OPEN)) {
       console.log('WebSocket already connecting or connected, skipping');
       return;
@@ -46,7 +83,6 @@ export const useWebSocketImageStream = ({
       console.log('Connecting to WebSocket:', url);
       const ws = new WebSocket(url);
       
-      // Set binary type to handle byte arrays properly
       ws.binaryType = 'blob';
       
       ws.onopen = () => {
@@ -54,7 +90,6 @@ export const useWebSocketImageStream = ({
         setIsConnected(true);
         setConnectionError(null);
         
-        // Send device identification if provided
         if (deviceId) {
           console.log('Sending device subscription:', deviceId);
           ws.send(JSON.stringify({ 
@@ -71,16 +106,30 @@ export const useWebSocketImageStream = ({
           if (event.data instanceof Blob) {
             console.log('Processing Blob data, size:', event.data.size, 'type:', event.data.type);
             
-            // Create object URL directly from blob - this should handle byte[] data properly
-            const imageUrl = URL.createObjectURL(event.data);
-            console.log('Created blob URL:', imageUrl.substring(0, 50) + '...');
-            updateImage(imageUrl);
+            const reader = new FileReader();
+            reader.onload = () => {
+              const base64 = reader.result as string;
+              console.log('Blob converted to base64, length:', base64.length);
+              updateImage(base64);
+            };
+            reader.onerror = (error) => {
+              console.error('FileReader error:', error);
+            };
+            reader.readAsDataURL(event.data);
             
           } else if (event.data instanceof ArrayBuffer) {
             console.log('Processing ArrayBuffer data, byteLength:', event.data.byteLength);
             const blob = new Blob([event.data], { type: 'image/jpeg' });
-            const imageUrl = URL.createObjectURL(blob);
-            updateImage(imageUrl);
+            const reader = new FileReader();
+            reader.onload = () => {
+              const base64 = reader.result as string;
+              console.log('ArrayBuffer converted to base64, length:', base64.length);
+              updateImage(base64);
+            };
+            reader.onerror = (error) => {
+              console.error('FileReader error for ArrayBuffer:', error);
+            };
+            reader.readAsDataURL(blob);
             
           } else if (typeof event.data === 'string') {
             console.log('Processing string data, length:', event.data.length);
@@ -88,17 +137,15 @@ export const useWebSocketImageStream = ({
             try {
               const data = JSON.parse(event.data);
               if (data.type === 'image' && data.data) {
-                // Handle base64 encoded image in JSON
                 const imageUrl = data.data.startsWith('data:') ? data.data : `data:image/jpeg;base64,${data.data}`;
-                console.log('JSON image data processed, data URL created');
+                console.log('JSON image data processed, length:', imageUrl.length);
                 updateImage(imageUrl);
               } else {
                 console.log('Received non-image JSON message:', data);
               }
             } catch (jsonError) {
-              // If not JSON, treat as raw base64 data
-              console.log('Treating string as raw base64 data');
               const imageUrl = event.data.startsWith('data:') ? event.data : `data:image/jpeg;base64,${event.data}`;
+              console.log('String treated as base64 image, length:', imageUrl.length);
               updateImage(imageUrl);
             }
           } else {
@@ -119,7 +166,6 @@ export const useWebSocketImageStream = ({
         setIsConnected(false);
         wsRef.current = null;
         
-        // Attempt to reconnect after 3 seconds if not manually closed
         if (event.code !== 1000 && autoConnect) {
           console.log('Scheduling reconnection in 3 seconds...');
           reconnectTimeoutRef.current = setTimeout(() => {
@@ -148,7 +194,6 @@ export const useWebSocketImageStream = ({
       wsRef.current = null;
     }
     
-    // Clean up object URL
     if (imageUrlRef.current && imageUrlRef.current.startsWith('blob:')) {
       console.log('Cleaning up blob URL on disconnect');
       URL.revokeObjectURL(imageUrlRef.current);
@@ -170,7 +215,6 @@ export const useWebSocketImageStream = ({
     };
   }, [connect, disconnect, autoConnect]);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (imageUrlRef.current && imageUrlRef.current.startsWith('blob:')) {
@@ -184,7 +228,7 @@ export const useWebSocketImageStream = ({
     isConnected,
     currentImage,
     connectionError,
-    imageKey, // Export the key for forcing re-renders
+    imageKey,
     connect,
     disconnect
   };

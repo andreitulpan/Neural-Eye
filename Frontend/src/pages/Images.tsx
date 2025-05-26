@@ -27,9 +27,8 @@ const Images = () => {
 
   console.log('Query state:', { images, isLoading, error });
 
-  const convertVarbinaryToBase64 = (varbinaryData: any): string => {
+  const convertVarbinaryToBase64 = (varbinaryData: any, imageId: number): string => {
     try {
-      // Handle different formats that varbinary might come in
       if (!varbinaryData) return '';
       
       console.log('Converting varbinary data, type:', typeof varbinaryData, 'constructor:', varbinaryData.constructor?.name);
@@ -41,20 +40,16 @@ const Images = () => {
       } else if (varbinaryData instanceof ArrayBuffer) {
         uint8Array = new Uint8Array(varbinaryData);
       } else if (Array.isArray(varbinaryData)) {
-        // Sometimes varbinary comes as array of numbers
         uint8Array = new Uint8Array(varbinaryData);
       } else if (typeof varbinaryData === 'string') {
-        // Sometimes it comes as a base64 string already
         return varbinaryData.startsWith('data:') ? varbinaryData : `data:image/jpeg;base64,${varbinaryData}`;
       } else if (varbinaryData.data && Array.isArray(varbinaryData.data)) {
-        // Buffer-like object with data property
         uint8Array = new Uint8Array(varbinaryData.data);
       } else {
         console.warn('Unknown varbinary format:', varbinaryData);
         return '';
       }
       
-      // Convert Uint8Array to base64
       let binary = '';
       const len = uint8Array.byteLength;
       for (let i = 0; i < len; i++) {
@@ -63,7 +58,8 @@ const Images = () => {
       const base64 = btoa(binary);
       
       console.log('Converted to base64, length:', base64.length);
-      return `data:image/jpeg;base64,${base64}`;
+      // Add cache busting with image ID and timestamp
+      return `data:image/jpeg;base64,${base64}#${imageId}-${Date.now()}`;
       
     } catch (error) {
       console.error('Error converting varbinary to base64:', error);
@@ -72,7 +68,7 @@ const Images = () => {
   };
 
   const renderImageContent = (image: ImageRecord) => {
-    const base64Image = convertVarbinaryToBase64(image.imageData);
+    const base64Image = convertVarbinaryToBase64(image.imageData, image.id);
     
     return (
       <Card key={image.id} className="mb-4 bg-card border-border">
@@ -93,11 +89,24 @@ const Images = () => {
               <h4 className="font-medium mb-2 text-card-foreground">Image</h4>
               {base64Image ? (
                 <img 
+                  key={`image-${image.id}-${Date.now()}`} // Force re-render with unique key
                   src={base64Image} 
                   alt={`Captured image ${image.id}`}
                   className="w-full h-auto rounded border border-border"
+                  style={{ 
+                    imageRendering: 'auto',
+                    maxWidth: '100%',
+                    height: 'auto'
+                  }}
+                  onLoad={(e) => {
+                    console.log('Image loaded successfully for image', image.id);
+                    // Force a small delay to ensure proper rendering
+                    setTimeout(() => {
+                      e.currentTarget.style.opacity = '1';
+                    }, 10);
+                  }}
                   onError={(e) => {
-                    console.error('Image failed to load:', e);
+                    console.error('Image failed to load for image', image.id);
                     console.log('Image src:', base64Image.substring(0, 100) + '...');
                   }}
                 />

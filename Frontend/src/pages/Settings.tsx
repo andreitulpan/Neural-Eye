@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Bell, ChevronRight, Lock, ShieldCheck, User, Zap } from 'lucide-react';
 import { useForm } from 'react-hook-form';
@@ -16,6 +15,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { SidebarProvider } from '@/components/layout/SidebarContext';
 import AppLayout from '@/components/layout/AppLayout';
+import { useAuth } from '@/contexts/AuthContext';
 
 // Form schema for user profile
 const profileFormSchema = z.object({
@@ -40,6 +40,7 @@ const notificationFormSchema = z.object({
 });
 
 const SettingsPage = () => {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("account");
   const [videoQuality, setVideoQuality] = useState([720]);
   const [retentionDays, setRetentionDays] = useState([7]);
@@ -48,9 +49,9 @@ const SettingsPage = () => {
   const profileForm = useForm({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
-      username: "admin_user",
-      email: "user@example.com",
-      name: "Admin User",
+      username: user?.name?.toLowerCase().replace(/\s+/g, '_') || "user",
+      email: user?.email || "",
+      name: user?.name || "",
     },
   });
   
