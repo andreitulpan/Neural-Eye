@@ -33,6 +33,11 @@ The following developers contributed to this project:
 - View the live image stream transmitted from the ESP32-CAM device in real time.
 - Click the button at the bottom-right corner to process the image and download it to your device.
 
+4. **Images**
+- Click on the Images tab in the left-hand menu to view all saved images.
+- Each image includes the text that was automatically extracted from it.
+- Only the user who captured the image will be able to view it.
+
 
 
 ## License
