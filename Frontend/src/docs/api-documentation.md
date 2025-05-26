@@ -55,27 +55,6 @@ Base URL: `https://neuraleye.thezion.one`
 
 ---
 
-### 3. Forgot Password
-- **Endpoint:** `/api/auth/forgot-password`
-- **Method:** `POST`
-- **Requires Bearer Token:** No (Public endpoint)
-- **Description:** Send password reset link to user email
-
-**Request Payload:**
-```json
-{
-  "email": "string"
-}
-```
-
-**Response:**
-```json
-{
-  "success": "boolean"
-}
-```
-
----
 
 ## Image Processing Endpoints
 
